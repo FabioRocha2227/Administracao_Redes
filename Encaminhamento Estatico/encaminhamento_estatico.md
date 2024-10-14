@@ -1,113 +1,400 @@
 # Trabalho 1 - Encaminhamento estático
 
-## Configuraçao rotas estáticas
+![alt text](img/image-1.png)
 
-### RCis1 deve ter uma rota para 192.180.40.0/24 através de RCis2
-    1- enable
-    2-config terminal
-    3-ip route 192.180.40.0 255.255.255.0 195.70.40.26
-    NOTA: para verificar a rota configurada, use o comando `show run (temos de fazer isto pois as interfaces ainda não estão configuradas)`
+## Configurações iniciais
+**NOTAS** :
++ login: **root** password:**admredes24**  
++ nmtui guarda automaticamente as configurações feitas em **keyfiles** 
+para manter as mudanças de rede persistentes
++ Confirmar sempre as configurações feitas antes de avançar
++ Nos **router's linux** temos de colocar a linha **"net.ipv4.ip_forward=1"** no ficheiro **/etc/sysctl.conf** para permitir reencaminhamento de  pacotes
++ Nos **router's cisco** ao configurar qualquer **interface** não esquecer de fazer **no shutdown** para ativar-la
++ Nos **router's cisco** para ter as **configurações persistentes** temos de executar o comando **copy running-config startup-config**
 
- ### RCis2 deve ter uma rota para 170.2.0.0/16 através de RCis1
-    1- enable1
-    2-config terminal
-    3. ip route 170.2.0.0 255.255.0.0 195.70.40.25
-    NOTA: para verificar a rota configurada, use o comando `show run (temos de fazer isto pois as interfaces ainda não estão configuradas)`
 
-### Term1 configuraçao rotas
- #### padrão (default) através de RLin e para 192.180.40.0/24 através de RCis1
-    1-log in (user:root pass:admredes24)
-    2-configurar interface
-    3-nmtui
-        3.1 edit ens3
-        3.2 IPV4 configuration: Manual
-        3.3 addresses 170.2.0.33/16
-        3.4 gateway 170.2.0.3
-        3.5 routing (edit)
-        3.6 Destination: 192.180.40.0/24 Nex hop : 170.2.0.1 Metric ---
-        3.7 OK -> BACK
-        3.8 Activate Connection -> ens3
- NOTA:para verificar se a configuraçao esta correta ifconfig
-
- #### A rota-padrão de Term2 é através de RCis2
-  1- nnmtui
-    1.1 addresses 192.180.40.44/24
-    1.2 192.180.40.2
-    1.3 OK -> BACK
-    1.4 Activate Connection -> ens4
- NOTA:para verificar se a configuraçao esta correta ifconfig
-
-#### RLin e RCis2 sem rota-padrão (configurar endereços estaticos das interfaces)
-![alt text](image.png)
-
-##### Configurar  interfaces RLin
+### Term1 (interface e rota)
+    Configurar Interface e rota
     1- nmtui
-    2- edit ens3
-        2.1 IPV4 configuration: Manual
-        2.2-Adresses 170.2.0.3/16
-    3-edit ens4
-        3.1- IPV4 configuration: Manual
-        3.2 - Adresses 192.180.30.3/24
-    4-edit ens4
-        4.1- IPV4 configuration: Manual
-        4.2 - Adresses 192.180.40.3/24
-    5-  OK -> BACK
-Para todas as interfaces fazer:
-    Activate Connection -> ensX
-    NOTA:para verificar se a configuraçao esta correta ifconfig ensX
-**NOTA:Nao esquecer de ativar o forwarding nos routers que sao linux, adicionando a linha net.ipv4.ip_forward=1 em /etc/sysctl.conf e dpois correr o comando sysctl -p**
+        1.1- editar a interface ens3
+        1.2- Ipv4 configuration: Manual 
+        1.3- Addresses: 170.2.0.33/16
+        1.4- Gateway: 170.2.0.3 
+        1.5- Routin (Edit) 
+        1.6- Destination: 192.180.40.0/24 Next hop : 170.2.0.1 Metric ---
+        //Se a rede destino tiver prefixo 192.180.40.0/24 então o
+        //proximo salto é 170.2.0.1
+        1.7- OK -> BACK
+        1.8- Activate connection ens3
+    Confirmar configuração interface
+    2- ifconfig ens3 
+    Confirmar configuração de rota
+    3- route -n
+        
 
-##### Configurar  interfaces RCis2
-    1-enable
-    2-config terminal
-    3-interface f1/1 (FastEthernet 1/1)
-    4- ip address 195.70.40.26 255.255.255.252 -> no shutdown
-    5- interface f1/0
-    6- ip address 192.180.40.2 255.255.255.0 -> no shutdown
-    7- end
-    8-copy running-config startup-config
-NOTA: para confirmar configuraçao interfaces usar show ip interface brief 
+### Term2 (interface e rota)
+    1- nmtui
+        1.1  - editar a interface ens3
+        1.2  - Ipv4 configuration: Manual 
+        1.3  - Addresses: 192.180.30.44/24
+        1.4  - OK
+        1.5  - editar a interface ens4
+        1.6  - Ipv4 configuration: Manual
+        1.7  - Addresses: 192.180.40.44/24
+        1.8  - Gateway: 192.180.40.2
+        1.9  - Desativar opção "Never use this network for default route"
+        1.10 - Ativar o "Automatically connect"
+        1.11 - OK -> BACK
+        1.12 - Activate connection ens3 e ens4
+    Confirmar configuração das interfaces
+    2. ifconfig 
+    Confirmar configuração de rota
+    3. route -n
 
-##### Configurar interfaces RCis1
-    1-enable
-    2-config terminal
-    3-interface f1/1 (FastEthernet 1/1)
-    4- ip address 195.70.40.25 255.255.255.252 -> no shutdown
-    5- interface f1/0
-    6- ip address 170.2.0.1 255.255.0.0 -> no shutdown
-    7- end
-    8-copy running-config startup-config
-NOTA: para confirmar configuraçao interfaces usar show ip interface brief 
 
+### RLin (Interfaces)
+    Ativar reencaminhamento ne pacotes 
+    1- nano /etc/sysctl.conf 
+        1.1- adicionar seguinte linha "net.ipv4.ip_forward=1"
+        1.2- sysctl -p (rele ficheiro de configuração)
+    Configurar interfaces
+    2- nmtui
+        2.1  - editar a interface ens3
+        2.2  - Ipv4 configuration: Manual 
+        2.3  - Addresses: 170.2.0.3/16
+        2.4  - OK
+        2.5  - editar a interface ens4
+        2.6  - Ipv4 configuration: Manual
+        2.7  - Addresses: 192.180.30.3/24
+        2.8  - Desativar opção "Never use this network for default route"
+        2.9  - Ativar o "Automatically connect"
+        2.10  - OK
+        2.11  - editar a interface ens5
+        2.13 - Ipv4 configuration: Manual
+        2.14 - Addresses: 192.180.40.3/24
+        2.15 - Desativar opção "Never use this network for default route"
+        2.16 - Ativar o "Automatically connect"
+        2.17 - OK -> BACK
+    	2.18 - Activate connection ens3, ens4 e ens5
+        Confirmar configuração das interfaces
+        3. ifconfig 
+        Confirmar configuração de rota
+        3. route -n
+        // Vemos as rotas diretamente ligadas (se o gateway for 0.0.0.0
+        // isto implica que existe conexão direta)
+
+### RCis1 (Interfaces e rotas)
+    1  - enable
+    2  - conf t
+    3  - show ip int brief
+    4  - int f1/0
+    5  - ip addr 170.2.0.1 255.255.0.0
+    6  - no shutdown
+    7  - int f1/1
+    // ip address <addr> <netmask>
+    8  - ip addr 195.70.40.25 255.255.255.252
+    9  - no shutdown
+    10 - exit 
+    //ip route <prefix> <netmask> <gateway>
+    //RCis1 deve ter uma rota para 192.180.40.0/24 através de RCis2
+    11 - ip route 192.180.40.0 255.255.255.0 195.70.40.26
+    Confirmar configuração interfaces
+    12 - show ip int brief
+    Confirmar a rota
+    13 - show ip route
+    Guardar permanentemente as configurações
+    14 - copy running-config startup-config
+
+### RCis2 (Interfaces e rotas)
+    1  - enable
+    2  - conf t
+    3  - show ip int brief
+    4  - int f1/0
+    5  - ip addr 192.180.40.2 255.255.255.0
+    6  - no shutdown
+    7  - int f1/1
+    8  - ip addr 195.70.40.26 255.255.255.252
+    // RCis2 deve ter uma rota para 170.2.0.0/16 através de RCis1
+    9  - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+    10 - end
+    11 - show ip route
+    12 - copy running-config startup-config
+
+### Verificar se existe comunicação 
+
+    1- terminal Term1
+        1.1 - ping 192.180.30.44 (Sucesso)
+        1.2 - ping 192.180.40.44 (Sucesso)
+
+
+**Notas**: 
++ As **interfaces de rede** das **máquinas Linux**, **ens3**, **ens4** e **ens5**, aparecem no **GNS3** como **Ethernet0**, **Ethernet1** e **Ethernet2**, respectivamente
++ Para que as **capturas de traceroute** sejam mais fáceis de interpretar, use a opção -N desse comando: **traceroute -n -N 1 <ipaddr>**
+
+## Questões/Traces/Análise
++ **outRes** significa capturar o output de um comando
++ **capRes** significa uma captura de pacotes (Wireshark ou tcpdump)
++ **confRes** significa anotar o(s) comando(s) para fazer a configuração pedida
++ **texRes** significa uma resposta textual (explicação, interpretação de resultados, …).
+
+
+1. Connectividade:
+    
+    a. Faça traceroute do Term2 para cada uma das interfaces do RLin.(outRes)
+
+    **ens3**
+    ![alt text](img/image-3.png)
+    **ens4**
+    ![alt text](img/image-2.png)
+    **ens5**
+    ![alt text](img/image-4.png)
+
+
+    b. Faça traceroute do Term1 para cada uma das interfaces do Term2 nas seguintes condições:
+
+    **show ip route RCis 2** 
+    ![alt text](img/image-6.png)
+
+        
+        i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
+            - enable
+            - conf t 
+            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - show ip route 
+            - copy running-config startup-config
+
+    **ens3**    
+
+    ![alt text](img/image-7.png)
+
+    **ens4**
+
+    ![alt text](img/image-8.png)
+        
+        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+            - enable
+            - conf t 
+            - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - show ip route 
+            - copy running-config startup-config
+
+    **ens3**
+
+    ![alt text](img/image-9.png)
+
+    **ens4**
+
+    ![alt text](img/image-10.png)
+
+        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+            - enable
+            - conf t 
+            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - ip route 170.2.0.0 255.255.0.0 192.180.40.3
+            - show ip route 
+            - copy running-config startup-config
+
+    **ens3**
+
+    ![alt text](img/image-11.png)
+
+
+    **ens4**
+
+    ![alt text](img/image-12.png)
+
+    **Dúvida: porque que não aparece o router RLIN e aparece \* \* \* ?**
+
+
+    c. Desligue agora o RCis1 para simular que avariou e repita a alínea anterior.
+    **clicar shutdown no RCis1**
+    ![alt text](img/image-5.png)
+
+        i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
+        (colocar como estava no ponto i da alinea b)
+            - enable
+            - conf t 
+            - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (veio da alinea anterior)
+            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25 
+            - show ip route 
+            - copy running-config startup-config
+
+    **ens3**
+
+    ![alt text](img/image-13.png)
+
+    **ens4**
+
+    ![alt text](img/image-14.png)
+
+        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+            - enable
+            - conf t 
+            - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - show ip route 
+            - copy running-config startup-config
+
+    **ens3**
+
+    ![alt text](img/image-15.png)
+
+    **ens4**
+
+    ![alt text](img/image-16.png)
+
+        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+            - enable
+            - conf t 
+            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - ip route 170.2.0.0 255.255.0.0 192.180.40.3
+            - show ip route 
+            - copy running-config startup-config
+
+    **ens3**
+
+    ![alt text](img/image-17.png)
+
+    **ens4**
+
+    ![alt text](img/image-18.png)
+
+    **NOTA: RCis1 deverá permanecer desligado para o resto do trabalho.**
+
+    d. Explique o que se passa em cada um dos casos na alínea anterior. (texRes)
+        
+        i.   RCis2 sem rota para a rede 170.2.0.0/16 
+
+            ens3: Como não temos rota para a rede com prefixo 170.2.0.0/16
+            portanto o pacote vai seguir o caminho Term1->Rlin->Term2->RCis2 e fica "preso" porque RCis2 não tem rota para a red com prefixo 170.2.0.0/16
+
+            ens4: O pacote não saio do Term1 visto que (apesar de existir uma rota no Term1 que indica que para a rede com prefixo 192.180.40.0/24 o proximo salto é RCis1) o RCis1 encontra-se desativado.
+    
+        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 
+
+            ens3: igual a alinea anterior
+
+            ens4: igual ao anterior
+
+        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin 
+
+            ens3: Neste caso como temos uma rota para a rede com o prefixo 170.2.0.0/16 via Rlin, uma pacote segue o seguinte caminho Term1->Rlin->Term2->RCis2->Rlin->Term1
+
+            ens4: Apesar de termos esta nova rota para 170.2.0.0/16 através de Rlin, o Term1 tem a rota definida para a rede com prefixo 192.180.40.0/24 através do RCis1, o que leva a o pacote ficar no Term1
+
+    e. Tendo em conta as duas alíneas anteriores, identifique condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede. Justifique. (texRes)
+
+    **Verificar resposta**
+
+        As condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede são o caso em que ocorrem mudanças na rede (encaminhamento dinamico ajusta-se automaticamente a estas mudanças).No caso das alineas anterios,se usarmos rotas estaticas e um router (RCis1 no caso) falhar, então todas as rotas que o utilizem vão falhar.
+
+
+    f. Faça um traceroute do Term2 para o Term1 nas três condições indicadas na alínea b. (outRes)
+
+        i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
+            - enable
+            - conf t 
+            - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (configurado na alinea anteriore)
+            - show ip route 
+            - copy running-config startup-config
+
+    ![alt text](img/image-19.png)
+
+        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+
+            - enable
+            - conf t 
+            - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - show ip route 
+            - copy running-config startup-config
+
+    ![alt text](img/image-20.png)
+
+
+        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+
+            - enable
+            - conf t 
+            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+            - ip route 170.2.0.0 255.255.0.0 192.180.40.3
+            - show ip route 
+            - copy running-config startup-config
+
+    **Duvida:Podemos escolher a interface pelo qual o traceroute vai??**
+
+    **tentei traceroute -i ens3 170.2.0.33 (mas não deu e penso que devia,porque temos conexão entre Term2 e Term1 via Rlin )**
+    ![alt text](img/image-21.png)
+
+
+
+    g. Tendo em conta os resultados da alínea anterior, seria útil ter encaminhamento dinâmico nos routers para conseguir resposta ao traceroute? Justifique.(texRes)
+
+    **Verificar resposta**
+
+        Sim, tal como foi justicado mais acima, o enchaminhamento dinâmico ajusta-se de forma automatica a mudanças na rede (falhas,
+        equipamento adicionado, alterações da topologia). Neste caso a falha do equipamento RCis1 compromete todas as comunicações que o utilizem.
+
+    h. Em RCis2, coloque a rota para a rede 170.2.0.0/16 através de RLin.
+
+    **Nota: para iniciar a captura no GNS3 basta clicar na ligação que queremos observar -> clicar com botão direito -> Iniciar wireshark**
+
+        i. Inicie uma captura na ligação de Term2 à sub-rede 192.180.40.0/24; faça traceroute desse terminal para um endereço IP da rede 170.2.0.0/16 ao qual não corresponda nenhuma máquina. Repita o traceroute (a saída deve ser diferente; caso seja igual, repita os dois traceroutes com outro endereço IP). (outRes + capRes)
+
+            - traceroute 170.2.0.2
+
+    ![alt text](img/image-23.png)
+    
+    ![alt text](img/image-22.png)
+
+            - traceroute 170.2.0.4
+    
+    ![alt text](img/image-24.png)
+
+    ![alt text](img/image-25.png)
+
+        ii. Por que razão é diferente a saída do traceroute? (texRes)
+    
+    **Dúvida: não percebi quais diferencas é que é suposto notar??**
+
+
+2. ARP. Inicie uma captura na ligação de Term2 ao switch da sub-rede 192.180.40.0/24.
+
+    a. Faça ping -c 1 192.180.40.55 e capture o resultado do ping. (capRes)
+
+        -No wireshark utilizar filtro (icmp or arp)
+    ![alt text](img/image-28.png) 
+
+    ![alt text](img/image-26.png)
+
+
+    b. Repita a alínea anterior para o endereço 192.180.40.3
+    ![alt text](img/image-27.png)
+
+
+    c. Comente os pacotes ARP e ICMP capturados nas alíneas anteriores, usando-os para explicar o funcionamento do protocolo ARP (incluindo timeouts e retransmissões). (texRes)
+
+        ARP: Tendo o endereço Ip do vizinho, este protocolo permite descobrir o respetivo endereço MAC
+
+        ICMP: Protocolo associado ao IP para controlo e diagnostico .As mensagens são transportadas diretamente sobre IP
+
+        alinea_a: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.55 (que não consegue descobrir porque mauquina não existe). Quanto ao ICMP, ficamos com o erro ICMP-Host Unreachable
     
 
-![alt text](image-1.png)
-### Questões/Traces/Análise
- 
-1-Connectividade:
-
-    a.Faça traceroute do Term2 para cada uma das interfaces do RLin.(outRes)
-            Traceroute para ens5 funciona, mas o traceroute para o ens4 nao funciona. Este comportamento e espectavel, pois nao foram feitas configuraçoes nao foram feitas entre ens4 e ens3(Para funcionar deveremos configurar de forma semelhante como no ponto 'A rota-padrão de Term2 é através de RCis2')
-
-    b.Faça traceroute do Term1 para cada uma das interfaces do Term2 nas seguintes condições:
-        i.RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
-            traceroute 192.180.30.44 ou traceroute 192.180.40.44  -> chega até ao RLin, mas nao consegue sair de la, pois ainda nao tem rota configurada.
-
-        ii.RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
-
-        ii.RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
-    c.Desligue agora o RCis1 para simular que avariou e repita a alínea anterior.
-    NOTA: RCis1 deverá permanecer desligado para o resto do trabalho.
-    d.Explique o que se passa em cada um dos casos na alínea anterior. (texRes)
-    e.Tendo em conta as duas alíneas anteriores, identifique condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede. Justifique. (texRes)
-    f.Faça um traceroute do Term2 para o Term1 nas três condições indicadas na alínea b. (outRes)
-    g.Tendo em conta os resultados da alínea anterior, seria útil ter encaminhamento dinâmico nos routers para conseguir resposta ao traceroute? Justifique.(texRes)
-    h.Em RCis2, coloque a rota para a rede 170.2.0.0/16 através de RLin.
-        i.Inicie uma captura na ligação de Term2 à sub-rede 192.180.40.0/24; faça traceroute desse terminal para um endereço IP da rede 170.2.0.0/16 ao qual não corresponda nenhuma máquina. Repita o traceroute (a saída deve ser diferente; caso seja igual, repita os dois traceroutes com outro endereço IP). (outRes + capRes)
-        ii.Por que razão é diferente a saída do traceroute? (texRes)
+        alinea_b: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.3 (que é uma interface do Rlin).Após descobrir envia essa informação para o Term2(192.180.40.44).De seguida o processo inverso é feito, ou seja, RLin(192.180.40.3) quer descobrir o endereço MAC do Term2 (192.180.40.44).E por fim temos o sucesso do ICMP
 
 
+3. Faça as capturas indicadas nas alíneas seguintes definindo filtros para 'apanhar' apenas pacotes TCP, com a flag PUSH activa e com um comprimento do pacote IP menor que 128 bytes. Faça ssh do terminal 1 para a interface 192.180.30.44 do terminal 2.
+
+**NOTAS: Pode testar os filtros usando, na shell da máquina remota, a='#'; while true; do echo $a; sleep 1; a=$a'#'; done. Se não conseguir fazer ssh (“connection refused”), vá ao Term2 e corra o seguinte comando como root: systemctl start sshd.service**
+
+    ssh de Term1 para interface 192.180.30.44 do terminal 2.
+
+        ssh 192.180.30.44
+
+**Não consegui fazer ssh do Term1 para Term2 Permission denied**
 
 
+    tcp[13] & 0x08 != 0 && ip[2:2] < 128
 
+    tcp[13] & 0x08 != 0: Captura pacotes TCP com a flag PUSH ativa. A flag PUSH está no 13º byte do cabeçalho TCP, e o valor 0x08 refere-se à flag PUSH.
 
+    ip[2:2] < 128: O comprimento total do pacote IP (indicado no segundo byte do cabeçalho IP) é menor que 128 bytes.
