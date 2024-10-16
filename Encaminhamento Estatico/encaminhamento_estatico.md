@@ -138,211 +138,217 @@ para manter as mudanças de rede persistentes
 + **texRes** significa uma resposta textual (explicação, interpretação de resultados, …).
 
 
-1. Connectividade:
+### 1. Connectividade:
     
-    a. Faça traceroute do Term2 para cada uma das interfaces do RLin.(outRes)
+#### a. Faça traceroute do Term2 para cada uma das interfaces do RLin.(outRes)
 
-    **ens3**
-    ![alt text](img/image-3.png)
-    **ens4**
-    ![alt text](img/image-2.png)
-    **ens5**
-    ![alt text](img/image-4.png)
+**ens3**
 
-
-    b. Faça traceroute do Term1 para cada uma das interfaces do Term2 nas seguintes condições:
-
-    **show ip route RCis 2** 
-    ![alt text](img/image-6.png)
-
-        
-        i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
-            - enable
-            - conf t 
-            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - show ip route 
-            - copy running-config startup-config
-
-    **ens3**    
-
-    ![alt text](img/image-7.png)
-
-    **ens4**
-
-    ![alt text](img/image-8.png)
-        
-        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
-            - enable
-            - conf t 
-            - ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - show ip route 
-            - copy running-config startup-config
-
-    **ens3**
-
-    ![alt text](img/image-9.png)
-
-    **ens4**
-
-    ![alt text](img/image-10.png)
-
-        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
-            - enable
-            - conf t 
-            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - ip route 170.2.0.0 255.255.0.0 192.180.40.3
-            - show ip route 
-            - copy running-config startup-config
-
-    **ens3**
-
-    ![alt text](img/image-11.png)
-
-
-    **ens4**
-
-    ![alt text](img/image-12.png)
-
-    **Dúvida: porque que não aparece o router RLIN e aparece \* \* \* ?**
-    R: A certos routers, que "escondem" este tipo de pacote
-
-
-    c. Desligue agora o RCis1 para simular que avariou e repita a alínea anterior.
-    **clicar shutdown no RCis1**
-    ![alt text](img/image-5.png)
-
-        i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
-        (colocar como estava no ponto i da alinea b)
-            - enable
-            - conf t 
-            - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (veio da alinea anterior)
-            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25 
-            - show ip route 
-            - copy running-config startup-config
-
-    **ens3**
-
-    ![alt text](img/image-13.png)
-
-    **ens4**
-
-    ![alt text](img/image-14.png)
-
-        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
-            - enable
-            - conf t 
-            - ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - show ip route 
-            - copy running-config startup-config
-
-    **ens3**
-
-    ![alt text](img/image-15.png)
-
-    **ens4**
-
-    ![alt text](img/image-16.png)
-
-        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
-            - enable
-            - conf t 
-            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - ip route 170.2.0.0 255.255.0.0 192.180.40.3
-            - show ip route 
-            - copy running-config startup-config
-
-    **ens3**
-
-    ![alt text](img/image-17.png)
-
-    **ens4**
-
-    ![alt text](img/image-18.png)
-
-    **NOTA: RCis1 deverá permanecer desligado para o resto do trabalho.**
-
-    d. Explique o que se passa em cada um dos casos na alínea anterior. (texRes)
-        
-        i.   RCis2 sem rota para a rede 170.2.0.0/16 
-
-            ens3: Como não temos rota para a rede com prefixo 170.2.0.0/16
-            portanto o pacote vai seguir o caminho Term1->Rlin->Term2->RCis2 e fica "preso" porque RCis2 não tem rota para a red com prefixo 170.2.0.0/16
-
-            ens4: O pacote não saio do Term1 visto que (apesar de existir uma rota no Term1 que indica que para a rede com prefixo 192.180.40.0/24 o proximo salto é RCis1) o RCis1 encontra-se desativado.
+![alt text](img/image-3.png)
     
-        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 
+**ens4**
 
-            ens3: igual a alinea anterior
+![alt text](img/image-2.png)
+    
+**ens5**
 
-            ens4: igual ao anterior
-
-        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin 
-
-            ens3: Neste caso como temos uma rota para a rede com o prefixo 170.2.0.0/16 via Rlin, uma pacote segue o seguinte caminho Term1->Rlin->Term2->RCis2->Rlin->Term1
-
-            ens4: Apesar de termos esta nova rota para 170.2.0.0/16 através de Rlin, o Term1 tem a rota definida para a rede com prefixo 192.180.40.0/24 através do RCis1, o que leva a o pacote ficar no Term1
-
-    e. Tendo em conta as duas alíneas anteriores, identifique condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede. Justifique. (texRes)
-
-    **Verificar resposta**
-
-        As condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede são o caso em que ocorrem mudanças na rede (encaminhamento dinamico ajusta-se automaticamente a estas mudanças).No caso das alineas anterios,se usarmos rotas estaticas e um router (RCis1 no caso) falhar, então todas as rotas que o utilizem vão falhar.
+![alt text](img/image-4.png)
 
 
-    f. Faça um traceroute do Term2 para o Term1 nas três condições indicadas na alínea b. (outRes)
+#### b. Faça traceroute do Term1 para cada uma das interfaces do Term2 nas seguintes condições:
 
-        i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
-            - enable
-            - conf t 
-            - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (configurado na alinea anteriore)
-            - show ip route 
-            - copy running-config startup-config
+**show ip route RCis 2** 
 
-    ![alt text](img/image-19.png)
+![alt text](img/image-6.png)
 
-        ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+        
+    i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
+        - enable
+        - conf t 
+        - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - show ip route 
+        - copy running-config startup-config
+**ens3**    
 
-            - enable
-            - conf t 
-            - ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - show ip route 
-            - copy running-config startup-config
+![alt text](img/image-7.png)
 
-    ![alt text](img/image-20.png)
+**ens4**
+
+![alt text](img/image-8.png)
+        
+    ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+        - enable
+        - conf t 
+        - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - show ip route 
+        - copy running-config startup-config
+
+**ens3**
+
+![alt text](img/image-9.png)
+
+**ens4**
+
+![alt text](img/image-10.png)
+
+    iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+        - enable
+        - conf t 
+        - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - ip route 170.2.0.0 255.255.0.0 192.180.40.3
+        - show ip route 
+        - copy running-config startup-config
+
+**ens3**
+
+![alt text](img/image-11.png)
+
+**ens4**
+
+![alt text](img/image-12.png)
+
+**Dúvida: porque que não aparece o router RLIN e aparece \* \* \* ?**
+R: A certos routers, que "escondem" este tipo de pacote
 
 
-        iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+#### c. Desligue agora o RCis1 para simular que avariou e repita a alínea anterior.
+    
+**clicar shutdown no RCis1**
 
-            - enable
-            - conf t 
-            - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
-            - ip route 170.2.0.0 255.255.0.0 192.180.40.3
-            - show ip route 
-            - copy running-config startup-config
+![alt text](img/image-5.png)
 
- ![alt text](img/image-21.png)
-    **tentei traceroute -i ens3 170.2.0.33 (mas não deu e penso que devia,porque temos conexão entre Term2 e Term1 via Rlin )**
-    R: Porque o Term1 tem uma rota para pacotes que querem ir para rede com prefixo 192.180.40.0/24 e como
-    o caminho para essa rede usa o RCis1 esta desligado, não consegue chegar lá (ver figura abaixo, em que mostra
-    a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar descobrir quem tem o endereço
-    170.2.0.1).
+    i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
+    (colocar como estava no ponto i da alinea b)
+        - enable
+        - conf t 
+        - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (veio da alinea anterior)
+        - no ip route 170.2.0.0 255.255.0.0 195.70.40.25 
+        - show ip route 
+        - copy running-config startup-config
 
-![alt text](img/image-29.png)
+**ens3**
 
-    g. Tendo em conta os resultados da alínea anterior, seria útil ter encaminhamento dinâmico nos routers para conseguir resposta ao traceroute? Justifique.(texRes)
+![alt text](img/image-13.png)
+
+**ens4**
+
+![alt text](img/image-14.png)
+
+    ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+        - enable
+        - conf t 
+        - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - show ip route 
+        - copy running-config startup-config
+
+**ens3**
+
+![alt text](img/image-15.png)
+
+**ens4**
+
+![alt text](img/image-16.png)
+
+    iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+        - enable
+        - conf t 
+        - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - ip route 170.2.0.0 255.255.0.0 192.180.40.3
+        - show ip route 
+        - copy running-config startup-config
+
+**ens3**
+
+![alt text](img/image-17.png)
+
+**ens4**
+
+![alt text](img/image-18.png)
+
+**NOTA: RCis1 deverá permanecer desligado para o resto do trabalho.**
+
+#### d. Explique o que se passa em cada um dos casos na alínea anterior. (texRes)
+        
+    i.   RCis2 sem rota para a rede 170.2.0.0/16 
+
+        ens3: Como não temos rota para a rede com prefixo 170.2.0.0/16 portanto o pacote vai seguir o caminho Term1->Rlin->Term2->RCis2 e fica "preso" porque RCis2 não tem rota para a red com prefixo 170.2.0.0/16
+
+        ens4: O pacote não saio do Term1 visto que (apesar de existir uma rota no Term1 que indica que para a rede com prefixo 192.180.40.0/24 o proximo salto é RCis1) o RCis1 encontra-se desativado.
+    
+    ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 
+
+        ens3: igual a alinea anterior
+
+        ens4: igual ao anterior
+
+    iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin 
+
+        ens3: Neste caso como temos uma rota para a rede com o prefixo 170.2.0.0/16 via Rlin, uma pacote segue o seguinte caminho Term1->Rlin->Term2->RCis2->Rlin->Term1
+
+        ens4: Apesar de termos esta nova rota para 170.2.0.0/16 através de Rlin, o Term1 tem a rota definida para a rede com prefixo 192.180.40.0/24 através do RCis1, o que leva a o pacote ficar no Term1
+
+#### e. Tendo em conta as duas alíneas anteriores, identifique condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede. Justifique. (texRes)
 
 **Verificar resposta**
 
-        Sim, tal como foi justicado mais acima, o enchaminhamento dinâmico ajusta-se de forma automatica a mudanças na rede (falhas,
-        equipamento adicionado, alterações da topologia). Neste caso a falha do equipamento RCis1 compromete todas as comunicações que o utilizem.
+    As condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede são o caso em que ocorrem mudanças na rede (encaminhamento dinamico ajusta-se automaticamente a estas mudanças).No caso das alineas anterios,se usarmos rotas estaticas e um router (RCis1 no caso) falhar, então todas as rotas que o utilizem vão falhar.
 
-    h. Em RCis2, coloque a rota para a rede 170.2.0.0/16 através de RLin.
+
+#### f. Faça um traceroute do Term2 para o Term1 nas três condições indicadas na alínea b. (outRes)
+
+    i.   RCis2 sem rota para a rede 170.2.0.0/16 (outRes)
+        - enable
+        - conf t 
+        - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (configurado na alinea anteriore)
+        - show ip route 
+        - copy running-config startup-config
+
+![alt text](img/image-19.png)
+
+    ii.  RCis2 com rota para a rede 170.2.0.0/16 através de RCis1 (outRes); indique também o comando usado para criar a rota (confRes)
+
+        - enable
+        - conf t 
+        - ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - show ip route 
+        - copy running-config startup-config
+
+![alt text](img/image-20.png)
+
+
+    iii. RCis2 com rota para a rede 170.2.0.0/16 através de RLin (outRes)
+
+        - enable
+        - conf t 
+        - no ip route 170.2.0.0 255.255.0.0 195.70.40.25
+        - ip route 170.2.0.0 255.255.0.0 192.180.40.3
+        - show ip route 
+        - copy running-config startup-config
+
+![alt text](img/image-21.png)
+
+**tentei traceroute -i ens3 170.2.0.33 (mas não deu e penso que devia,porque temos conexão entre Term2 e Term1 via Rlin )**
+R: Porque o Term1 tem uma rota para pacotes que querem ir para rede com prefixo 192.180.40.0/24 e como
+o caminho para essa rede usa o RCis1 esta desligado, não consegue chegar lá (ver figura abaixo, em que mostra
+a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar descobrir quem tem o endereço
+170.2.0.1).
+
+![alt text](img/image-29.png)
+
+#### g. Tendo em conta os resultados da alínea anterior, seria útil ter encaminhamento dinâmico nos routers para conseguir resposta ao traceroute? Justifique.(texRes)
+
+**Verificar resposta**
+
+    Sim, tal como foi justicado mais acima, o enchaminhamento dinâmico ajusta-se de forma automatica a mudanças na rede (falhas,
+    equipamento adicionado, alterações da topologia). Neste caso a falha do equipamento RCis1 compromete todas as comunicações que o utilizem.
+
+#### h. Em RCis2, coloque a rota para a rede 170.2.0.0/16 através de RLin.
 
 **Nota: para iniciar a captura no GNS3 basta clicar na ligação que queremos observar -> clicar com botão direito -> Iniciar wireshark**
 
-        i. Inicie uma captura na ligação de Term2 à sub-rede 192.180.40.0/24; faça traceroute desse terminal para um endereço IP da rede 170.2.0.0/16 ao qual não corresponda nenhuma máquina. Repita o traceroute (a saída deve ser diferente; caso seja igual, repita os dois traceroutes com outro endereço IP). (outRes + capRes)
+    i. Inicie uma captura na ligação de Term2 à sub-rede 192.180.40.0/24; faça traceroute desse terminal para um endereço IP da rede 170.2.0.0/16 ao qual não corresponda nenhuma máquina. Repita o traceroute (a saída deve ser diferente; caso seja igual, repita os dois traceroutes com outro endereço IP). (outRes + capRes)
 
-            - traceroute 170.2.0.2
+        - traceroute 170.2.0.2
 
 ![alt text](img/image-23.png)
     
@@ -354,46 +360,41 @@ para manter as mudanças de rede persistentes
 
 ![alt text](img/image-25.png)
 
-        ii. Por que razão é diferente a saída do traceroute? (texRes)
+    ii. Por que razão é diferente a saída do traceroute? (texRes)
 
-    
-**Dúvida: não percebi quais diferencas é que é suposto notar??**
-
-R: A primeira vez que fazemos um traceroute para um terminal não existente da sub-rede
-172.2.0.0/16 temos o **redirect** ,que foi feito pelo **RCis2** para **RLin**.Das proximas vezes que 
-tentarmos enviar para o mesmo endereço, como temos o Term2 diretamente conectado a RLin, o **RCis2** diz
-para enviar diretamente (ver figura seguinte).
+    R: A primeira vez que fazemos um traceroute para um terminal não existente da sub-rede 172.2.0.0/16 temos o **redirect** ,que foi feito pelo **RCis2** para **RLin**.Das proximas vezes que tentarmos enviar para o mesmo endereço, como temos o Term2 diretamente conectado a RLin, o **RCis2** diz para enviar diretamente (ver figura seguinte).
 
 ![alt text](img/image-30.png)
 
 
-2. ARP. Inicie uma captura na ligação de Term2 ao switch da sub-rede 192.180.40.0/24.
+### 2. ARP. Inicie uma captura na ligação de Term2 ao switch da sub-rede 192.180.40.0/24.
 
-    a. Faça ping -c 1 192.180.40.55 e capture o resultado do ping. (capRes)
+#### a. Faça ping -c 1 192.180.40.55 e capture o resultado do ping. (capRes)
 
-        -No wireshark utilizar filtro (icmp or arp)
-    ![alt text](img/image-28.png) 
+    -No wireshark utilizar filtro (icmp or arp)
+![alt text](img/image-28.png) 
 
-    ![alt text](img/image-26.png)
-
-
-    b. Repita a alínea anterior para o endereço 192.180.40.3
-    ![alt text](img/image-27.png)
+![alt text](img/image-26.png)
 
 
-    c. Comente os pacotes ARP e ICMP capturados nas alíneas anteriores, usando-os para explicar o funcionamento do protocolo ARP (incluindo timeouts e retransmissões). (texRes)
+#### b. Repita a alínea anterior para o endereço 192.180.40.3
 
-        ARP: Tendo o endereço Ip do vizinho, este protocolo permite descobrir o respetivo endereço MAC
+![alt text](img/image-27.png)
 
-        ICMP: Protocolo associado ao IP para controlo e diagnostico .As mensagens são transportadas diretamente sobre IP
 
-        alinea_a: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.55 (que não consegue descobrir porque mauquina não existe). Quanto ao ICMP, ficamos com o erro ICMP-Host Unreachable
+#### c. Comente os pacotes ARP e ICMP capturados nas alíneas anteriores, usando-os para explicar o funcionamento do protocolo ARP (incluindo timeouts e retransmissões). (texRes)
+
+    ARP: Tendo o endereço Ip do vizinho, este protocolo permite descobrir o respetivo endereço MAC
+
+    ICMP: Protocolo associado ao IP para controlo e diagnostico .As mensagens são transportadas diretamente sobre IP
+
+    alinea_a: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.55 (que não consegue descobrir porque mauquina não existe). Quanto ao ICMP, ficamos com o erro ICMP-Host Unreachable
     
 
-        alinea_b: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.3 (que é uma interface do Rlin).Após descobrir envia essa informação para o Term2(192.180.40.44).De seguida o processo inverso é feito, ou seja, RLin(192.180.40.3) quer descobrir o endereço MAC do Term2 (192.180.40.44).E por fim temos o sucesso do ICMP
+    alinea_b: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.3 (que é uma interface do Rlin).Após descobrir envia essa informação para o Term2(192.180.40.44).De seguida o processo inverso é feito, ou seja, RLin(192.180.40.3) quer descobrir o endereço MAC do Term2 (192.180.40.44).E por fim temos o sucesso do ICMP
 
 
-3. Faça as capturas indicadas nas alíneas seguintes definindo filtros para 'apanhar' apenas pacotes TCP, com a flag PUSH activa e com um comprimento do pacote IP menor que 128 bytes. Faça ssh do terminal 1 para a interface 192.180.30.44 do terminal 2.
+### 3. Faça as capturas indicadas nas alíneas seguintes definindo filtros para 'apanhar' apenas pacotes TCP, com a flag PUSH activa e com um comprimento do pacote IP menor que 128 bytes. Faça ssh do terminal 1 para a interface 192.180.30.44 do terminal 2.
 
 **NOTAS: Pode testar os filtros usando, na shell da máquina remota, a='#'; while true; do echo $a; sleep 1; a=$a'#'; done. Se não conseguir fazer ssh (“connection refused”), vá ao Term2 e corra o seguinte comando como root: systemctl start sshd.service**
 
@@ -413,20 +414,18 @@ para enviar diretamente (ver figura seguinte).
 
 
 
-    a.Utilize o tcpdump no Term2, capturando em todas as interfaces (tcpdump -l -n -i any filtro) e indique o filtro usado. (confRes + capRes)
+#### a.Utilize o tcpdump no Term2, capturando em todas as interfaces (tcpdump -l -n -i any filtro) e indique o filtro usado. (confRes + capRes)
 
 
 **Dúvida: não consegui fazer porque o comando: "tcpdump -l -n -i eth0 'tcp[13] & 0x08 != 0 and (ip[2:2] < 128)'" da erro de sintax**
 
-    b.Utilize o wireshark com filtro de visualização (captura na ligação de Term1 à rede) e indique o filtro usado. (confRes + capRes)
+#### b.Utilize o wireshark com filtro de visualização (captura na ligação de Term1 à rede) e indique o filtro usado. (confRes + capRes)
 
 **Dúvida: não percebi o que é suposto fazer???**
     
-    c.Como se pode calcular o tamanho do campo de dados no pacote IP? (texRes)
+#### c.Como se pode calcular o tamanho do campo de dados no pacote IP? (texRes)
 
-    R: Tamanho do Payload=
-        Tamanho Total do Pacote IP − Tamanho do Cabeçalho IP−Tamanho do Cabeçalho TCP
-​
+    R: Tamanho do Payload= Tamanho Total do Pacote IP − Tamanho do Cabeçalho IP−Tamanho do Cabeçalho TCP
 
     Tamanho do Cabeçalho IP:
 
