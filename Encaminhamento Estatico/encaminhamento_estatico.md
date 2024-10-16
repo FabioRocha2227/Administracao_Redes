@@ -204,6 +204,7 @@ para manter as mudanças de rede persistentes
     ![alt text](img/image-12.png)
 
     **Dúvida: porque que não aparece o router RLIN e aparece \* \* \* ?**
+    R: A certos routers, que "escondem" este tipo de pacote
 
 
     c. Desligue agora o RCis1 para simular que avariou e repita a alínea anterior.
@@ -319,41 +320,51 @@ para manter as mudanças de rede persistentes
             - show ip route 
             - copy running-config startup-config
 
-    **Duvida:Podemos escolher a interface pelo qual o traceroute vai??**
-
+ ![alt text](img/image-21.png)
     **tentei traceroute -i ens3 170.2.0.33 (mas não deu e penso que devia,porque temos conexão entre Term2 e Term1 via Rlin )**
-    ![alt text](img/image-21.png)
+    R: Porque o Term1 tem uma rota para pacotes que querem ir para rede com prefixo 192.180.40.0/24 e como
+    o caminho para essa rede usa o RCis1 esta desligado, não consegue chegar lá (ver figura abaixo, em que mostra
+    a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar descobrir quem tem o endereço
+    170.2.0.1).
 
-
+![alt text](img/image-29.png)
 
     g. Tendo em conta os resultados da alínea anterior, seria útil ter encaminhamento dinâmico nos routers para conseguir resposta ao traceroute? Justifique.(texRes)
 
-    **Verificar resposta**
+**Verificar resposta**
 
         Sim, tal como foi justicado mais acima, o enchaminhamento dinâmico ajusta-se de forma automatica a mudanças na rede (falhas,
         equipamento adicionado, alterações da topologia). Neste caso a falha do equipamento RCis1 compromete todas as comunicações que o utilizem.
 
     h. Em RCis2, coloque a rota para a rede 170.2.0.0/16 através de RLin.
 
-    **Nota: para iniciar a captura no GNS3 basta clicar na ligação que queremos observar -> clicar com botão direito -> Iniciar wireshark**
+**Nota: para iniciar a captura no GNS3 basta clicar na ligação que queremos observar -> clicar com botão direito -> Iniciar wireshark**
 
         i. Inicie uma captura na ligação de Term2 à sub-rede 192.180.40.0/24; faça traceroute desse terminal para um endereço IP da rede 170.2.0.0/16 ao qual não corresponda nenhuma máquina. Repita o traceroute (a saída deve ser diferente; caso seja igual, repita os dois traceroutes com outro endereço IP). (outRes + capRes)
 
             - traceroute 170.2.0.2
 
-    ![alt text](img/image-23.png)
+![alt text](img/image-23.png)
     
-    ![alt text](img/image-22.png)
+![alt text](img/image-22.png)
 
             - traceroute 170.2.0.4
     
-    ![alt text](img/image-24.png)
+![alt text](img/image-24.png)
 
-    ![alt text](img/image-25.png)
+![alt text](img/image-25.png)
 
         ii. Por que razão é diferente a saída do traceroute? (texRes)
+
     
-    **Dúvida: não percebi quais diferencas é que é suposto notar??**
+**Dúvida: não percebi quais diferencas é que é suposto notar??**
+
+R: A primeira vez que fazemos um traceroute para um terminal não existente da sub-rede
+172.2.0.0/16 temos o **redirect** ,que foi feito pelo **RCis2** para **RLin**.Das proximas vezes que 
+tentarmos enviar para o mesmo endereço, como temos o Term2 diretamente conectado a RLin, o **RCis2** diz
+para enviar diretamente (ver figura seguinte).
+
+![alt text](img/image-30.png)
 
 
 2. ARP. Inicie uma captura na ligação de Term2 ao switch da sub-rede 192.180.40.0/24.
@@ -388,9 +399,9 @@ para manter as mudanças de rede persistentes
 
     ssh de Term1 para interface 192.180.30.44 do terminal 2.
 
-        ssh 192.180.30.44
+**Aceder ao utilizador ar via SSH!!**
 
-**Não consegui fazer ssh do Term1 para Term2 Permission denied**
+    ssh ar@192.180.30.44
 
 
     tcp[13] & 0x08 != 0 && ip[2:2] < 128
@@ -398,3 +409,33 @@ para manter as mudanças de rede persistentes
     tcp[13] & 0x08 != 0: Captura pacotes TCP com a flag PUSH ativa. A flag PUSH está no 13º byte do cabeçalho TCP, e o valor 0x08 refere-se à flag PUSH.
 
     ip[2:2] < 128: O comprimento total do pacote IP (indicado no segundo byte do cabeçalho IP) é menor que 128 bytes.
+
+
+
+
+    a.Utilize o tcpdump no Term2, capturando em todas as interfaces (tcpdump -l -n -i any filtro) e indique o filtro usado. (confRes + capRes)
+
+
+**Dúvida: não consegui fazer porque o comando: "tcpdump -l -n -i eth0 'tcp[13] & 0x08 != 0 and (ip[2:2] < 128)'" da erro de sintax**
+
+    b.Utilize o wireshark com filtro de visualização (captura na ligação de Term1 à rede) e indique o filtro usado. (confRes + capRes)
+
+**Dúvida: não percebi o que é suposto fazer???**
+    
+    c.Como se pode calcular o tamanho do campo de dados no pacote IP? (texRes)
+
+    R: Tamanho do Payload=
+        Tamanho Total do Pacote IP − Tamanho do Cabeçalho IP−Tamanho do Cabeçalho TCP
+​
+
+    Tamanho do Cabeçalho IP:
+
+    -> O tamanho do cabeçalho IP é definido no campo de "Internet Header Length" (IHL), que está nos primeiros 4 bits do byte 0 do cabeçalho IP.
+    
+    -> O valor do IHL é dado em múltiplos de 4 bytes. Por exemplo, se o valor do IHL for 5, o tamanho do cabeçalho IP será 5 * 4 = 20 bytes (tamanho típico do cabeçalho IP sem opções).
+
+    Tamanho do Cabeçalho TCP:
+
+    -> O tamanho do cabeçalho TCP está armazenado no campo "Data Offset" (ou TCP Header Length), que são os primeiros 4 bits do byte 12 do cabeçalho TCP.
+
+    -> Este valor também é dado em múltiplos de 4 bytes. O valor mais comum é 5 (que corresponde a 20 bytes, para o cabeçalho TCP básico).
