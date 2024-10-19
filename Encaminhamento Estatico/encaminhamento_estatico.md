@@ -231,6 +231,8 @@ R: A certos routers, que "escondem" este tipo de pacote
 ![alt text](img/image-13.png)
 
 **ens4**
++ <u>(!H -> significa que o ip que aparece, no caso 170.2.0.33 foi recebido ICMP-Host Unreachable)</u>
++ <u>O ICMP Host Unreachable foi gerado por o ARP (que fez tres tentivas de descobrir o MAC de RCis1,e como não teve sucesso gerou esse erro e envio para o Term1)</u>
 
 ![alt text](img/image-14.png)
 
@@ -246,6 +248,8 @@ R: A certos routers, que "escondem" este tipo de pacote
 ![alt text](img/image-15.png)
 
 **ens4**
++ <u>(!H -> significa que o ip que aparece, no caso 170.2.0.33 foi recebido ICMP-Host Unreachable)</u>
++ <u>O ICMP Host Unreachable foi gerado por o ARP (que fez tres tentivas de descobrir o MAC de RCis1,e como não teve sucesso gerou esse erro e envio para o Term1)</u>
 
 ![alt text](img/image-16.png)
 
@@ -289,9 +293,14 @@ R: A certos routers, que "escondem" este tipo de pacote
 
 #### e. Tendo em conta as duas alíneas anteriores, identifique condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede. Justifique. (texRes)
 
-**Verificar resposta**
+**(Nossa resposta)Verificar resposta**
 
     As condições genéricas que tornam vantajoso o uso de encaminhamento dinâmico numa rede são o caso em que ocorrem mudanças na rede (encaminhamento dinamico ajusta-se automaticamente a estas mudanças).No caso das alineas anterios,se usarmos rotas estaticas e um router (RCis1 no caso) falhar, então todas as rotas que o utilizem vão falhar.
+
+**Resposta professor**
+
+    O encaminhamneto dinâmico pode estabelecer/alterar rotas, ou seja , adaptar rotas a caminhos funcionais. Para tal ser possivel, seria necessário rotas alternativas.
+
 
 
 #### f. Faça um traceroute do Term2 para o Term1 nas três condições indicadas na alínea b. (outRes)
@@ -302,6 +311,8 @@ R: A certos routers, que "escondem" este tipo de pacote
         - no ip route 170.2.0.0 255.255.0.0 192.180.40.3 (configurado na alinea anteriore)
         - show ip route 
         - copy running-config startup-config
+
+**Nota: da host unreachable, mas neste caso é gerado por o RCis2 e não foi gerado por ARP mas sim pelo facto de RCis2 não conseguir chegar ao Term1 por não ter rota para lá**
 
 ![alt text](img/image-19.png)
 
@@ -329,7 +340,7 @@ R: A certos routers, que "escondem" este tipo de pacote
 
 **tentei traceroute -i ens3 170.2.0.33 (mas não deu e penso que devia,porque temos conexão entre Term2 e Term1 via Rlin )**
 R: Porque o Term1 tem uma rota para pacotes que querem ir para rede com prefixo 192.180.40.0/24 e como
-o caminho para essa rede usa o RCis1 esta desligado, não consegue chegar lá (ver figura abaixo, em que mostra
+a rota para essa rede usa o RCis1 e ele esta desligado, não consegue chegar lá (ver figura abaixo, em que mostra
 a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar descobrir quem tem o endereço
 170.2.0.1).
 
@@ -337,10 +348,9 @@ a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar d
 
 #### g. Tendo em conta os resultados da alínea anterior, seria útil ter encaminhamento dinâmico nos routers para conseguir resposta ao traceroute? Justifique.(texRes)
 
-**Verificar resposta**
+**Resposta do professor**
 
-    Sim, tal como foi justicado mais acima, o enchaminhamento dinâmico ajusta-se de forma automatica a mudanças na rede (falhas,
-    equipamento adicionado, alterações da topologia). Neste caso a falha do equipamento RCis1 compromete todas as comunicações que o utilizem.
+    Neste caso o encaminhamento dinamico não nos iria ajudar, porque o problema esta no facto do Term1 ter como gateway o RCis1 para a rede 192.180.40.0/24 , que está desligado.Como os terminais não "falam" encaminhamento dinamico, não se ajustava a mudanças na rede.
 
 #### h. Em RCis2, coloque a rota para a rede 170.2.0.0/16 através de RLin.
 
@@ -348,13 +358,15 @@ a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar d
 
     i. Inicie uma captura na ligação de Term2 à sub-rede 192.180.40.0/24; faça traceroute desse terminal para um endereço IP da rede 170.2.0.0/16 ao qual não corresponda nenhuma máquina. Repita o traceroute (a saída deve ser diferente; caso seja igual, repita os dois traceroutes com outro endereço IP). (outRes + capRes)
 
-        - traceroute 170.2.0.2
+<br>
+
+    - traceroute 170.2.0.2
 
 ![alt text](img/image-23.png)
     
 ![alt text](img/image-22.png)
 
-            - traceroute 170.2.0.4
+    - traceroute 170.2.0.4
     
 ![alt text](img/image-24.png)
 
@@ -362,7 +374,7 @@ a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar d
 
     ii. Por que razão é diferente a saída do traceroute? (texRes)
 
-    R: A primeira vez que fazemos um traceroute para um terminal não existente da sub-rede 172.2.0.0/16 temos o **redirect** ,que foi feito pelo **RCis2** para **RLin**.Das proximas vezes que tentarmos enviar para o mesmo endereço, como temos o Term2 diretamente conectado a RLin, o **RCis2** diz para enviar diretamente (ver figura seguinte).
+R: A **primeira vez que fazemos um traceroute** para um terminal não existente da sub-rede 172.2.0.0/16 temos o **redirect** ,que foi feito pelo **RCis2** para **RLin**.Das proximas vezes que tentarmos enviar para o mesmo endereço, como temos o Term2 diretamente conectado a RLin, o **RCis2** diz para enviar diretamente (ver figura seguinte).
 
 ![alt text](img/image-30.png)
 
@@ -388,7 +400,7 @@ a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar d
 
     ICMP: Protocolo associado ao IP para controlo e diagnostico .As mensagens são transportadas diretamente sobre IP
 
-    alinea_a: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.55 (que não consegue descobrir porque mauquina não existe). Quanto ao ICMP, ficamos com o erro ICMP-Host Unreachable
+    alinea_a: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.55 (que não consegue descobrir porque maquina não existe). Quanto ao ICMP, ficamos com o erro ICMP-Host Unreachable
     
 
     alinea_b: Vemos o protoclo Arp a tentar descobrir o endereço MAC de 192.180.40.3 (que é uma interface do Rlin).Após descobrir envia essa informação para o Term2(192.180.40.44).De seguida o processo inverso é feito, ou seja, RLin(192.180.40.3) quer descobrir o endereço MAC do Term2 (192.180.40.44).E por fim temos o sucesso do ICMP
@@ -402,39 +414,52 @@ a captura de um ping apartir de Term2 para Term1 e vemos que ele esta a tentar d
 
 **Aceder ao utilizador ar via SSH!!**
 
-    ssh ar@192.180.30.44
+    
 
 
-    tcp[13] & 0x08 != 0 && ip[2:2] < 128
+    tcp[tcpflags] and tcp-push != 0 & 0x08 != 0 && ip[2:2] < 128
 
-    tcp[13] & 0x08 != 0: Captura pacotes TCP com a flag PUSH ativa. A flag PUSH está no 13º byte do cabeçalho TCP, e o valor 0x08 refere-se à flag PUSH.
+    tcp[tcpflags] and tcp-push != 0: Captura pacotes TCP com a flag PUSH ativa. A flag PUSH está no 13º byte do cabeçalho TCP, e o valor 0x08 refere-se à flag PUSH.
 
     ip[2:2] < 128: O comprimento total do pacote IP (indicado no segundo byte do cabeçalho IP) é menor que 128 bytes.
 
 
-
+**Utilizei screenshots/comandos da resolução do professor**
 
 #### a.Utilize o tcpdump no Term2, capturando em todas as interfaces (tcpdump -l -n -i any filtro) e indique o filtro usado. (confRes + capRes)
 
+    No Term2
+    $ tcpdump -l -n -i any 'tcp[tcpflags] and tcp-push != 0 & ip[2:2] < 128'
 
-**Dúvida: não consegui fazer porque o comando: "tcpdump -l -n -i eth0 'tcp[13] & 0x08 != 0 and (ip[2:2] < 128)'" da erro de sintax**
+    No Term1
+    $ ssh ar@192.180.30.44
+    $ a='#'; while true; do echo $a; sleep 1; a=$a'#'; done
+
+    (ver no Term2 o que aparece, aparecia muitas mensagens portanto não tirei screenshot)
+
+
+
+
 
 #### b.Utilize o wireshark com filtro de visualização (captura na ligação de Term1 à rede) e indique o filtro usado. (confRes + capRes)
 
-**Dúvida: não percebi o que é suposto fazer???**
-    
+    filtro wireshark:  tcp.flags.push == 1 && ip.len < 128
+
+    No Term1
+    $ ssh ar@192.180.30.44
+    $ a='#'; while true; do echo $a; sleep 1; a=$a'#'; done
+
+    (ver no Wireshark, em baixo tem apenas uma print de alguns dos pacotes)
+![alt text](img/image-31.png)
+
+    (com filtro de visualização, ip.len < 128 && tcp.flags.push == 1)
+![alt text](img/image-32.png)
+
+
 #### c.Como se pode calcular o tamanho do campo de dados no pacote IP? (texRes)
 
-    R: Tamanho do Payload= Tamanho Total do Pacote IP − Tamanho do Cabeçalho IP−Tamanho do Cabeçalho TCP
+    R: Tamanho do campo de dados pacote Ip= 
+    Tamanho Total do Pacote IP − Tamanho do Cabeçalho IP
 
-    Tamanho do Cabeçalho IP:
-
-    -> O tamanho do cabeçalho IP é definido no campo de "Internet Header Length" (IHL), que está nos primeiros 4 bits do byte 0 do cabeçalho IP.
-    
-    -> O valor do IHL é dado em múltiplos de 4 bytes. Por exemplo, se o valor do IHL for 5, o tamanho do cabeçalho IP será 5 * 4 = 20 bytes (tamanho típico do cabeçalho IP sem opções).
-
-    Tamanho do Cabeçalho TCP:
-
-    -> O tamanho do cabeçalho TCP está armazenado no campo "Data Offset" (ou TCP Header Length), que são os primeiros 4 bits do byte 12 do cabeçalho TCP.
-
-    -> Este valor também é dado em múltiplos de 4 bytes. O valor mais comum é 5 (que corresponde a 20 bytes, para o cabeçalho TCP básico).
+ 
+![alt text](img/image-33.png)
