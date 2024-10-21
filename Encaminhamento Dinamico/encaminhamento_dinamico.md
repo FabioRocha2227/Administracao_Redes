@@ -18,11 +18,17 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 + O **router R2** pertence a **dois sistemas autónomos**, pelo que **necessitará de dois processos OSPF distintos**. Este **router** deve **redistribuir no AS2** as **rotas aprendidas no AS1** e **vice-versa**. As **rotas importadas** devem ter uma **métrica 100**.
 
 **Duvida: não percebi o que é para fazer no ponto abaixo**
-
+     
+     Optimizaçoes finais, para evitar tanto trafego na rede (fazer esta configuraçao no R2 e R6)
+    
 + As **sub-redes 192.168.1.x** devem ser **sumarizadas na rede classful** a que pertencem para **efeitos de redistribuição** (e apenas para este fim)
+     
+
 
 
 **Duvida: não percebi o que é para fazer no ponto abaixo**
+     
+     Configurar os router, com ligaçoes para os "baloes", como interfaces passivas(sao apenas optimizaçoes para o protocolo OSPF, nao sao obrigatorias)
 
 + **Não devem ser enviadas mensagens de encaminhamento nas interfaces às quais não está ligado nenhum outro router (incluindo as ligadas aos terminais)**
 
@@ -293,6 +299,8 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 ![alt text](duvida.png) 
 
 (**mascara /30** não pode ser /31 porque so deixa 2 endereços e esses endereços ja estão reservados, ver explicação no moodle)
+
+     Temos que determinar a mascara correta para cada subrede(tem de ser uma mascara que permita apenas 2 endereços de host para eveitar confusoes com outras sbunetes -> ver video moodle)
 
 ### R6 (verificar esta configuração) - TODO
 
