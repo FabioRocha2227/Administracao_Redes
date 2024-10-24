@@ -1,5 +1,10 @@
 # Trabalho 2- Encaminhamento dinâmico
 
+# TODO: refazer as configurações iniciais novamente e tirar screenshots
+
+**duvida**: porque é que em certos routers nos fazemos o uso de **redistribute** e noutros não?? 
+
+**duvida**: o **redistribute** é necessario no r2 para o funcionamento do ospf?
 
 **NOTAS IMPORTANTES:**
 
@@ -22,11 +27,18 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 **Duvida: como faco com que as rotas importadas tenham uma métrica de 100**
 
+    redistribute ospf <id> metric 100 subnets (confirmar)
+
 + O **router R2** pertence a **dois sistemas autónomos**, pelo que **necessitará de dois processos OSPF distintos**. Este **router** deve **redistribuir no AS2** as **rotas aprendidas no AS1** e **vice-versa**. As **rotas importadas** devem ter uma **métrica 100**.
 
 **Nota sobre ponto abaixo:**
      
-     Optimizaçoes finais, para evitar tanto trafego na rede (fazer esta configuraçao no R2 e R6)
+    Optimizaçoes finais, para evitar tanto trafego na rede (fazer esta configuraçao no R2 e R6)
+
+     summary-address <prefix> <netmask> 
+     
+    Na configuração do processo OSPF do ASBR,este comando indica que as sub-redes da rede indicada importadas devem ser sumarizadas nessa
+    rede para redistribuição
     
 + As **sub-redes 192.168.1.x** devem ser **sumarizadas na rede classful** a que pertencem para **efeitos de redistribuição** (e apenas para este fim)
      
@@ -36,6 +48,12 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 **Nota sobre ponto abaixo:**
      
      Configurar os router, com ligaçoes para os "baloes", como interfaces passivas(sao apenas optimizaçoes para o protocolo OSPF, nao sao obrigatorias)
+
+    No respetivo router, e no respetivo proceso ospf:
+
+    passive-interface <interface>:
+    Impede o envio de mensagens RIP na interface indicada;
+    contudo, a rede dessa interface continua a incluir-se em anúncios enviados noutras interfaces, e mensagens RIP recebidas nessa interface continuam a ser processadas normalmente.
 
 + **Não devem ser enviadas mensagens de encaminhamento nas interfaces às quais não está ligado nenhum outro router (incluindo as ligadas aos terminais)**
 
@@ -56,26 +74,38 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 +   *ipcalc -m 0.0.0.0/x*
 
-### Term 1
+
+**Nota**
+
+✅ -> configuração correta
+⚠️ -> verificar configuração com professor (pode também ser uma duvida ou ambos)
+
+### Term 1 ✅
 
     1. ip 192.168.1.123/25 192.168.1.1
     2. save
 
-### Term 2
+### Term 2 ✅
 
     1. ip 172.16.1.2/24 172.16.1.1 
     2. save
 
 
-### R1
-    1. Configurar endereço interface f1/0
+### R1 ⚠️
+
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R1
+
+    1. Configurar endereço interface f1/0 ✅
         1.1. enable 
         1.2. conf t
         1.3. int f1/0
         1.4. ip addr 192.168.1.1 255.255.255.128
         1.5. no shutdown
         1.6. exit
-    2. Configurar endereço interface f1/1
+    2. Configurar endereço interface f1/1 ✅
         2.1. enable
         2.2. conf t
         2.3. int f1/1
@@ -87,12 +117,15 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](img/image-20.png)
 
-    4. Definir router id (AS1, cada router Rn deve usar como ID 1.0.0.n)
+    4. Definir router id (AS1, cada router Rn deve usar como ID 1.0.0.n) 
         4.1 enable
         4.2 conf t 
         4.3 router opsf 1
         4.4 router-id 1.0.0.1
-    5. Definir quais interfaces fazem  parte do OSPF e associar custo 
+
+**Nota: Como todas as interfaces deste router pertencem a mesma area OSPF, podemos simplesmente fazer** *network 0.0.0.0 255.255.255.255 area 0* 
+
+    5. Definir quais interfaces fazem  parte do OSPF e associar custo  ⚠️
         5.1 enable 
         5.2 conf t 
         5.3 router ospf 1 
@@ -124,23 +157,28 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         7.1 copy running-config startup-config
 
 
-### R2 
+### R2 ⚠️
 
-    1. Configurar endereço interface f1/0
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R2
+
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0
         1.4 ip addr 192.168.1.193 255.255.255.192
         1.5 no shutdown
         1.6 exit
-    2. Configurar endereço interface f1/1
+    2. Configurar endereço interface f1/1 ✅
         1.1 enable
         2.2 conf t 
         2.3 int f1/1
         2.4 ip addr 192.168.1.130 255.255.255.192
         2.5 no shutdown 
         2.6 exit
-    3. Configurar endereço interface f2/0
+    3. Configurar endereço interface f2/0 ✅
         3.1 enable
         3.2 conf t 
         3.3 int f2/0
@@ -150,7 +188,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](img/image-21.png)
 
-    4. Configurar interface OSPF da esquerda (id = 1) e custo 
+    4. Configurar interface OSPF da esquerda (id = 1) e custo  
         (AS1, cada router Rn deve usar como ID 1.0.0.n)
         4.1 router opsf 1
         4.2 router-id 1.0.0.2
@@ -158,51 +196,76 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         (não executei os comandos 4.3 a 4.5, verificar se estao corretos) 
         4.3 auto-cost reference-bandwidth 10000
 
-        4.4: network 192.168.1.192  0.0.0.63 area 0
-        4.5: network 192.168.1.128 0.0.0.63  area 0
-        4.6 end
-    5. Configurar interface OSPF da direita (id = 2) e custo 
+        (4.4 e 4.5  <=> network 192.168.1.0 0.0.0.255 area 0)
+        4.4 network 192.168.1.192  0.0.0.63 area 0 ⚠️
+        4.5 network 192.168.1.128 0.0.0.63  area 0 ⚠️
+
+**redistribute ospf <pid> Activa a redistribuição pelo RIP das rotas aprendidas através da instância <pid> do protocolo OSPF**
+
+        4.6 redistribute ospf 2 metric 100 subnets ⚠️ (PEDIR PARA EXPLICAR ISTO, NÃO BASTAVA O NETWORK??)
+
+
+        (Não devem ser enviadas mensagens de encaminhamento nas interfaces às quais não está ligado nenhum outro router (f1/0))
+        4.7 passive-interface FastEthernet1/0 ✅
+        
+        4.8 end
+
+    
+    5. Configurar interface OSPF da direita (id = 2) e custo  ✅
         (No AS2, cada router Rn deve usar como ID 2.0.0.n)
         5.1 router opsf 2
         5.2 router-id 2.0.0.2
 
         5.3 auto-cost reference-bandwidth 10000 
-        5.4 network 192.168.50.0  0.0.0.255 area 0
-        5.4 end
-    6. Demonstração de informação OSPF
-        6.1 enable 
-        6.2 show ip ospf database 
+        5.4 network 192.168.50.0  0.0.0.255 area 0 
+
+**redistribute ospf <pid> Activa a redistribuição pelo RIP das rotas aprendidas através da instância <pid> do protocolo OSPF**
+
+        5.5 redistribute ospf 1 metric 100 subnets ⚠️ (PEDIR PARA EXPLICAR ISTO, NÃO BASTAVA O NETWORK??)
+        5.6 end
+
+    6. As sub-redes 192.168.1.x devem ser sumarizadas na rede classful ✅
+        6.1 summary-address 192.168.1.0 255.255.255.0
+
+    7. Demonstração de informação OSPF
+        7.1 enable 
+        7.2 show ip ospf database 
 
 ![alt text](img/image-25.png)
 
-        6.3 show ip ospf interface brief
+        7.3 show ip ospf interface brief
 
 ![alt text](img/image-26.png)
 
-        6.4 show ip ospf neighbor
+        7.4 show ip ospf neighbor
 
 ![alt text](img/image-27.png)
 
-    7. Guardar configuração
-        7.1 copy running-config startup-config
+    8. Guardar configuração
+        8.1 copy running-config startup-config
 
 
-### R3
-    1. Configurar endereço interface f1/0
+### R3 ⚠️
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R3
+
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0
         1.4 ip addr 192.168.60.1 255.255.255.0
         1.5 no shutdown
         1.6 exit
-    2. Configurar endereço interface f2/0 (mascara é /24 por ser rede classe C)
+    2. Configurar endereço interface f2/0 (mascara é /24 por ser rede classe C) ✅
         2.1 enable
         2.2 conf t 
         2.3 int f2/0
         2.4 ip addr 192.168.100.1 255.255.255.0
         2.5 no shutdown
         2.6 exit
-    3. Configurar endereço interface f1/1
+    3. Configurar endereço interface f1/1 ✅
         3.1 enable
         3.2 conf t 
         3.3 int f1/1
@@ -229,15 +292,19 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
 
-        6.5 network 192.168.50.0  0.0.0.255  area 0
-        6.6 network 192.168.60.0  0.0.0.255  area 0
-        6.7 network 192.168.100.0  0.0.0.255  area 0
-        6.8 end 
+        (<=> network 0.0.0.0 255.255.255.255 area 0, porque todas as interfaces pertencem ao mesmo opsf)
+         
+        6.5 network 192.168.50.0  0.0.0.255  area 0 ⚠️
+        6.6 network 192.168.60.0  0.0.0.255  area 0 ⚠️
+        6.7 network 192.168.100.0  0.0.0.255  area 0 ⚠️
+
+        (Não devem ser enviadas mensagens de encaminhamento nas interfaces às quais não está ligado nenhum outro router (f1/0))
+        6.8 passive-interface FastEthernet1/0 ⚠️
+        6.9 end 
 
     7. Demonstração de informação OSPF
         7.1 enable 
         7.2 show ip ospf database 
-
 ![alt text](img/image-29.png)
 
         7.3 show ip ospf interface brief
@@ -252,8 +319,12 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         8.1 copy running-config startup-config
 
 
-### R4 (verificar esta configuração) 
-    1. Configurar endereço interface f1/0
+### R4 ✅
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R4
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0 (mascara é /24 por ser rede classe C)
@@ -265,11 +336,11 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](img/image-32.png)
 
-    3. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)
+    3. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)  ✅
         3.1 router opsf 1
         3.2 router-id 2.0.0.4
 
-    4. Definir quais interfaces fazem  parte do OSPF e associar custo 
+    4. Definir quais interfaces fazem  parte do OSPF e associar custo  ✅
         4.1 enable 
         4.2 conf t 
         4.3 router ospf 1 
@@ -304,8 +375,12 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 
 
-### R5 (verificar esta configuração)
-    1. Configurar endereço interface f1/0
+### R5  ✅
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R5
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0 (mascara é /24 por ser rede classe C)
@@ -317,11 +392,11 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](img/image-36.png)
 
-    3. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)
+    3. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n) ✅
         3.1 router opsf 1
         3.2 router-id 2.0.0.5
 
-    4. Definir quais interfaces fazem  parte do OSPF e associar custo 
+    4. Definir quais interfaces fazem  parte do OSPF e associar custo  ✅
         4.1 enable 
         4.2 conf t 
         4.3 router ospf 1 
@@ -357,121 +432,106 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 >(**mascara /30** não pode ser /31 porque so deixa 2 endereços e esses endereços ja estão reservados, ver explicação no moodle)
 > ver apontomentos que tenho sobre o video "Determinar comprimentos de prefixo"
 
-### R6 (verificar esta configuração) - TODO confirmar 
+### R6  ⚠️
 
-    1. Configurar endereço interface f1/1
+**duvida**: porque é que aqui não usamos network e usamos ip ospf <id> area <numero_area>? 
+
+**duvida**: porque é que aqui so basta uma instancia ospf? (penso que se deve ao facto que não estamos a definir o ospf com network mas sim por interface com o comando ip ospf <id> area <numero_area> mas confirmar)
+
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R6
+    1. Configurar endereço interface f1/1 e ospf ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/1 ( mascara de rede é /30)
         1.4 ip addr 172.20.1.1 255.255.255.252 (TODO confirmar esta configuracao)
-        1.5 no shutdown
-        1.6 exit
-    2. Configurar endereço s2/0 (TODO - confirmar esta configuração)
-        2.1 enable
+
+        1.5 ip ospf 1 area 1
+
+        1.6 no shutdown
+        1.7 exit
+    2. Configurar endereço s2/0 e ospf ✅
+        2.1 enable 
         2.2 conf t
         2.3 int s2/0 
         2.4 ip addr 172.20.1.14 255.255.255.252  (TODO confirmar esta configuracao)
-        2.5 no shutdown
-        2.6 exit
-    3. Configurar endereço interface f1/0
+
+        2.5 ip ospf 1 area 2
+
+        2.6 no shutdown
+        2.7 exit
+
+    3. Configurar endereço interface f1/0 e  ospf ✅
         3.1 enable
         3.2 conf t 
         3.3 int f1/0 (mascara é /24 por ser rede classe C)
         3.4 ip addr 192.168.100.2 255.255.255.0 
-        3.5 no shutdown
-        3.6 exit
+
+        3.5 ip ospf 1 area 0
+
+        3.6 no shutdown
+        3.7 exit
 
     4. Confirmar configurações
         4.1 show ip int brief 
 
 ![alt text](img/image-40.png)
+ 
+    5 definicao ospf ✅
+        5.1 router ospf 1
+        5.2 router-id 2.0.0.6
+        5.3 auto-cost reference-bandwidth 10000 
 
 
-![alt text](img/image-42.png)
-
-
-    5. Configurar interface OSPF da esquerda (id = 1) , custo e router id
+    5. Demonstração de informação OSPF
         5.1 enable 
-        5.2 conf t 
-        5.3 router ospf 1 
-        5.4 router-id 2.0.0.6
-     
-        (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        5.5 auto-cost reference-bandwidth 10000 
-        
-        (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
-        5.6 network 192.168.100.0  0.0.0.255  area 0
-        5.7 end
-
-
-    6. Configurar interface OSPF superior direita (id = 2) , custo e router id
-        6.1 enable 
-        6.2 conf t 
-        6.3 router ospf 2 
-        6.4 router-id 0.0.2.6  (TODO confirmar esta configuracao)
-                
-        (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        6.5 auto-cost reference-bandwidth 10000 
-
-        (determinei a rede com comando ipcalc -n 170.20.1.14/30)
-        6.6 (TODO - confirmar esta configuração) network 170.20.1.12 0.0.0.3  area 2 
-        6.7 end 
-
-    7. Configurar interface OSPF inferior direita (id = 3) , custo e router id
-        7.1 enable 
-        7.2 conf t 
-        7.3 router ospf 3
-        7.4 router-id 0.0.1.6  (TODO confirmar esta configuracao)
-                
-        (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        7.5 auto-cost reference-bandwidth 10000 
-
-        (determinei a rede com comando ipcalc -n 170.20.1.1/30)
-        7.6 (TODO - confirmar esta configuração) network 170.20.1.0 0.0.0.3  area 1
-        7.7 end 
-
-    8. Demonstração de informação OSPF
-        8.1 enable 
-        8.2 show ip ospf database 
+        5.2 show ip ospf database 
 
 ![alt text](img/image-43.png)
 
-        8.3 show ip ospf interface brief
+        5.3 show ip ospf interface brief
 
 ![alt text](img/image-44.png)
 
 
-        8.4 (TODO- colocar screenshot quando tiver configurado)show ip ospf neighbor
+        5.4 (TODO- colocar screenshot quando tiver configurado)show ip ospf neighbor
 
 ![alt text](img/image-45.png)
 
-    9. Guardar configuração
-        9.1 copy running-config startup-config
+    6. Guardar configuração
+        6.1 copy running-config startup-config
 
 
-### R7 (verificar esta configuração) - TODO confirmar
+### R7 ⚠️
 
-    1. Configurar endereço interface f1/0
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R7
+
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0 ( mascara de rede é /30)
-        1.4 ip addr 172.20.1.2 255.255.255.252 (TODO confirmar esta configuracao)
+        1.4 ip addr 172.20.1.2 255.255.255.252
         1.5 no shutdown
         1.6 exit
         
-    2. Configurar endereço interface f1/1
+    2. Configurar endereço interface f1/1 ✅
         2.1 enable
         2.2 conf t 
         2.3 int f1/1 ( mascara de rede é /30)
-        2.4 ip addr 172.20.1.5 255.255.255.252 (TODO confirmar esta configuracao)
+        2.4 ip addr 172.20.1.5 255.255.255.252 
         2.5 no shutdown
         2.6 exit
 
-    3. Configurar endereço interface f2/0
+    3. Configurar endereço interface f2/0 ✅
         3.1 enable
         3.2 conf t 
         3.3 int f2/0 
-        3.4 ip addr 172.16.1.1 255.255.255.0 (TODO confirmar esta configuracao)
+        3.4 ip addr 172.16.1.1 255.255.255.0 
         3.5 no shutdown
         3.6 exit
 
@@ -494,9 +554,11 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         4.4 auto-cost reference-bandwidth 10000 
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
-        4.5 (TODO - confirmar esta configuração) network 172.16.1.0  0.0.0.255  area 1
-        4.6 (TODO - confirmar esta configuração) network 172.20.1.0 0.0.0.3 area 1 
-        4.7 (TODO - confirmar esta configuração) network  172.20.1.4 0.0.0.3 area 1 
+
+        (4.5 , 4.6 e 4.7 <=> network 0.0.0.0 255.255.255.255 area 1 , porque todas as interfacespertencem ao mesmo ospf )
+        4.5 network 172.16.1.0  0.0.0.255  area 1  ⚠️
+        4.6 network 172.20.1.0 0.0.0.3 area 1 ⚠️
+        4.7 network  172.20.1.4 0.0.0.3 area 1  ⚠️
         4.8 end
 
     5. Demonstração de informação OSPF
@@ -518,28 +580,36 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         6.1 copy running-config startup-config
 
 
-### R8 (verificar esta configuração) - TODO confirmar
-    1. Configurar endereço interface f1/0
+### R8 ✅
+
+
+
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R8
+
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0 ( mascara de rede é /30)
-        1.4 ip addr 172.18.1.1 255.255.255.0 (TODO confirmar esta configuracao)
+        1.4 ip addr 172.18.1.1 255.255.255.0 
         1.5 no shutdown
         1.6 exit
         
-    2. Configurar endereço interface f1/1
+    2. Configurar endereço interface f1/1 ✅
         2.1 enable
         2.2 conf t 
         2.3 int f1/1 ( mascara de rede é /30)
-        2.4 ip addr  172.20.1.10 255.255.255.252 (TODO confirmar esta configuracao)
+        2.4 ip addr  172.20.1.10 255.255.255.252 
         2.5 no shutdown
         2.6 exit
 
-    3. Configurar endereço s2/0 (TODO - confirmar esta configuração)
+    3. Configurar endereço s2/0 ✅
         3.1 enable
         3.2 conf t
         3.3 int s2/0 
-        3.4 ip addr 172.20.1.13 255.255.255.252  (TODO confirmar esta configuracao)
+        3.4 ip addr 172.20.1.13 255.255.255.252 
         3.5 no shutdown
         3.6 exit
 
@@ -548,7 +618,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](img/image-49.png)
 
-    5. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)
+    5. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n) ✅
         5.1 router opsf 1
         5.2 router-id 2.0.0.8
 
@@ -563,10 +633,16 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
-        6.5 (TODO - confirmar esta configuração) network 172.18.1.0  0.0.0.255  area 2
-        6.6 (TODO - confirmar esta configuração) network 172.20.1.12 0.0.0.3 area 2 
-        6.7 (TODO - confirmar esta configuração) network 172.20.1.8 0.0.0.3 area 2 
-        6.8 end
+
+         (6.5, 6.6 e 6.7 <=> network 0.0.0.0 255.255.255.255 area 2 porque todas as interfaces de R8 estão na mesma area)
+        6.5 network 172.18.1.0  0.0.0.255  area 2 ⚠️
+        6.6  network 172.20.1.12 0.0.0.3 area 2 ⚠️
+        6.7 network 172.20.1.8 0.0.0.3 area 2 ⚠️
+
+        
+        (Não devem ser enviadas mensagens de encaminhamento nas interfaces às quais não está ligado nenhum outro router (f1/0))
+        6.8 passive-interface FastEthernet1/0 ✅
+        6.9 end
 
 
     7. Demonstração de informação OSPF
@@ -587,30 +663,37 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         8.1 copy running-config startup-config
 
 
-![alt text](img/image-53.png)
 
-### R9 (verificar esta configuração) - TODO
-    1. Configurar endereço interface f1/0
+### R9 
+
+**duvida**: porque que aqui nos usamos apenas uma instancia opsf e no R2 usamos 2? (eu penso que se deva ao facto de R2 estar em duas area 0 *backbone* distintas, enquanto que outros routers como o caso de R6 e R9 podem ter interfaces em diferentes areas, mas nenhuma delas é area 0 *backbone*)
+
+    0. Configurar hostname ✅
+        0.1 enable
+        0.2 cof t 
+        0.3 hostname R9
+
+    1. Configurar endereço interface f1/0 ✅
         1.1 enable
         1.2 conf t 
         1.3 int f1/0 ( mascara de rede é /30)
-        1.4 ip addr 172.20.1.6 255.255.255.252 (TODO confirmar esta configuracao)
+        1.4 ip addr 172.20.1.6 255.255.255.252 
         1.5 no shutdown
         1.6 exit
         
-    2. Configurar endereço interface f1/1
+    2. Configurar endereço interface f1/1 ✅
         2.1 enable
         2.2 conf t 
         2.3 int f1/1 ( mascara de rede é /30)
-        2.4 ip addr 172.20.1.9 255.255.255.252 (TODO confirmar esta configuracao)
+        2.4 ip addr 172.20.1.9 255.255.255.252 
         2.5 no shutdown
         2.6 exit
 
-    3. Configurar endereço interface f2/0
+    3. Configurar endereço interface f2/0 ✅
         3.1 enable
         3.2 conf t 
         3.3 int f2/0 
-        3.4 ip addr 172.17.0.1 255.255.0.0 (TODO confirmar esta configuracao)
+        3.4 ip addr 172.17.0.1 255.255.0.0 
         3.5 no shutdown
         3.6 exit
 
@@ -631,39 +714,30 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
         5.6 network 172.20.1.8  0.0.0.3 area 2
         5.7 network 172.17.0.0  0.0.255.255 area 2
-        5.8 end
+        5.8 network 172.20.1.4 0.0.0.3 area 1
 
-    
-    6. Configurar interface OSPF da zona castanha (id = 2) , custo e router id
+       (Não devem ser enviadas mensagens de encaminhamento nas interfaces às quais não está ligado nenhum outro router (f2/0))
+        5.9 passive-interface FastEthernet2/0
+
+        5.10 end
+
+    6. Demonstração de informação OSPF
         6.1 enable 
-        6.2 conf t 
-        6.3 router ospf 2 
-        6.4 router-id 0.0.1.9
-     
-        (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        6.5 auto-cost reference-bandwidth 10000 
-        
-        (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
-        6.6 network 172.20.1.4  0.0.0.3 area 1
-        6.7 end
-
-    7. Demonstração de informação OSPF
-        7.1 enable 
-        7.2 show ip ospf database 
+        6.2 show ip ospf database 
 
 ![alt text](img/image-55.png)
 
-        7.3 show ip ospf interface brief
+        6.3 show ip ospf interface brief
 
 ![alt text](img/image-56.png)
 
 
-        7.4 show ip ospf neighbor
+        6.4 show ip ospf neighbor
 
 ![alt text](img/image-57.png)
 
-    8. Guardar configuração
-        8.1 copy running-config startup-config
+    7. Guardar configuração
+        7.1 copy running-config startup-config
 
 
 ### Testar conectividade 
