@@ -742,7 +742,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ### Testar conectividade 
 
-**Temos problemas de conectividade, seguir sugestão do professor fazer o que esta abaixo**
+**Nota**: testei na maioria das interfaces e funciona
 
 Para testar a conectividade temos de:
 
