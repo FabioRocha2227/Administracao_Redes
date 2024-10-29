@@ -1,7 +1,5 @@
 # Trabalho 2- Encaminhamento dinâmico
 
-# TODO: refazer as configurações iniciais novamente e tirar screenshots
-
 **duvida**: porque é que em certos routers nos fazemos o uso de **redistribute** e noutros não?? 
 
 **duvida**: o **redistribute** é necessario no r2 para o funcionamento do ospf?
@@ -14,8 +12,6 @@
 
 + A eleição de **DR**, **BDR** e **BDROther** é feita em cada sub-rede cada vez que a ligamos (no caso do GNS3, cada vez que clicamos na seta do play) 
 
-+ AS CONFIGURACOES MOSTRADOS NAS SCREENSHOTS PODE TER INFORMACAO INCORRETA NO QUE TORNA A OSPF, PORQUE AS CONFIGURAÇÕES FORAM FEITAS EM DIFERENTES "SESSOES", O QUE LEVA A QUE OS "PROCESSOS DE ELEICAO DR e BDR" ASSOCIADOS AOS ROUTER PODEM TER SIDO DIFERENTES.
- 
 ![alt text](img/image-19.png)
 
 ## Objetivo
@@ -120,7 +116,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
     4. Definir router id (AS1, cada router Rn deve usar como ID 1.0.0.n) 
         4.1 enable
         4.2 conf t 
-        4.3 router opsf 1
+        4.3 router ospf 1
         4.4 router-id 1.0.0.1
 
 **Nota: Como todas as interfaces deste router pertencem a mesma area OSPF, podemos simplesmente fazer** *network 0.0.0.0 255.255.255.255 area 0* 
@@ -132,7 +128,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
         
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        5.4 auto-cost reference-bandwidth 10000
+        5.4 auto-cost reference-bandwidth 1000
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
 
@@ -151,7 +147,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
         6.4  show ip ospf neighbor
 
-![alt text](image-24.png) 
+![alt text](img/image-24.png) 
 
     7. Guardar configuração
         7.1 copy running-config startup-config
@@ -190,11 +186,11 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
     4. Configurar interface OSPF da esquerda (id = 1) e custo  
         (AS1, cada router Rn deve usar como ID 1.0.0.n)
-        4.1 router opsf 1
+        4.1 router ospf 1
         4.2 router-id 1.0.0.2
 
         (não executei os comandos 4.3 a 4.5, verificar se estao corretos) 
-        4.3 auto-cost reference-bandwidth 10000
+        4.3 auto-cost reference-bandwidth 1000
 
         (4.4 e 4.5  <=> network 192.168.1.0 0.0.0.255 area 0)
         4.4 network 192.168.1.192  0.0.0.63 area 0 ⚠️
@@ -213,10 +209,10 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
     
     5. Configurar interface OSPF da direita (id = 2) e custo  ✅
         (No AS2, cada router Rn deve usar como ID 2.0.0.n)
-        5.1 router opsf 2
+        5.1 router ospf 2
         5.2 router-id 2.0.0.2
 
-        5.3 auto-cost reference-bandwidth 10000 
+        5.3 auto-cost reference-bandwidth 1000 
         5.4 network 192.168.50.0  0.0.0.255 area 0 
 
 **redistribute ospf <pid> Activa a redistribuição pelo RIP das rotas aprendidas através da instância <pid> do protocolo OSPF**
@@ -225,6 +221,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         5.6 end
 
     6. As sub-redes 192.168.1.x devem ser sumarizadas na rede classful ✅
+        6.1 router ospf 2
         6.1 summary-address 192.168.1.0 255.255.255.0
 
     7. Demonstração de informação OSPF
@@ -240,7 +237,6 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         7.4 show ip ospf neighbor
 
 ![alt text](img/image-27.png)
-
     8. Guardar configuração
         8.1 copy running-config startup-config
 
@@ -279,7 +275,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 
     5. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)
-        5.1 router opsf 1
+        5.1 router ospf 1
         5.2 router-id 2.0.0.3
     
     6. Definir quais interfaces fazem  parte do OSPF e associar custo 
@@ -288,11 +284,11 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         6.3 router ospf 1 
         
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        6.4 auto-cost reference-bandwidth 10000 
+        6.4 auto-cost reference-bandwidth 1000 
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
 
-        (<=> network 0.0.0.0 255.255.255.255 area 0, porque todas as interfaces pertencem ao mesmo opsf)
+        (<=> network 0.0.0.0 255.255.255.255 area 0, porque todas as interfaces pertencem ao mesmo ospf)
          
         6.5 network 192.168.50.0  0.0.0.255  area 0 ⚠️
         6.6 network 192.168.60.0  0.0.0.255  area 0 ⚠️
@@ -337,7 +333,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 ![alt text](img/image-32.png)
 
     3. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)  ✅
-        3.1 router opsf 1
+        3.1 router ospf 1
         3.2 router-id 2.0.0.4
 
     4. Definir quais interfaces fazem  parte do OSPF e associar custo  ✅
@@ -347,7 +343,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
      
         
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        4.4 auto-cost reference-bandwidth 10000 
+        4.4 auto-cost reference-bandwidth 1000 
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
         4.5 network 192.168.100.0  0.0.0.255  area 0
@@ -372,9 +368,6 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 
 
-
-
-
 ### R5  ✅
     0. Configurar hostname ✅
         0.1 enable
@@ -393,7 +386,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 ![alt text](img/image-36.png)
 
     3. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n) ✅
-        3.1 router opsf 1
+        3.1 router ospf 1
         3.2 router-id 2.0.0.5
 
     4. Definir quais interfaces fazem  parte do OSPF e associar custo  ✅
@@ -403,7 +396,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
      
         
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        4.4 auto-cost reference-bandwidth 10000 
+        4.4 auto-cost reference-bandwidth 1000 
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
         4.5 network 192.168.100.0  0.0.0.255  area 0
@@ -429,7 +422,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](duvida.png) 
 
->(**mascara /30** não pode ser /31 porque so deixa 2 endereços e esses endereços ja estão reservados, ver explicação no moodle)
+>R: (**mascara /30** não pode ser /31 porque so deixa 2 endereços e esses endereços ja estão reservados, ver explicação no moodle)
 > ver apontomentos que tenho sobre o video "Determinar comprimentos de prefixo"
 
 ### R6  ⚠️
@@ -448,6 +441,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         1.3 int f1/1 ( mascara de rede é /30)
         1.4 ip addr 172.20.1.1 255.255.255.252 (TODO confirmar esta configuracao)
 
+        (configura ospf com id 1 e respetiva area nesta interface)
         1.5 ip ospf 1 area 1
 
         1.6 no shutdown
@@ -458,6 +452,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         2.3 int s2/0 
         2.4 ip addr 172.20.1.14 255.255.255.252  (TODO confirmar esta configuracao)
 
+        (configura ospf com id 1 e respetiva area nesta interface)
         2.5 ip ospf 1 area 2
 
         2.6 no shutdown
@@ -469,6 +464,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         3.3 int f1/0 (mascara é /24 por ser rede classe C)
         3.4 ip addr 192.168.100.2 255.255.255.0 
 
+        (configura ospf com id 1 e respetiva area nesta interface)
         3.5 ip ospf 1 area 0
 
         3.6 no shutdown
@@ -482,7 +478,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
     5 definicao ospf ✅
         5.1 router ospf 1
         5.2 router-id 2.0.0.6
-        5.3 auto-cost reference-bandwidth 10000 
+        5.3 auto-cost reference-bandwidth 1000 
 
 
     5. Demonstração de informação OSPF
@@ -490,13 +486,14 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         5.2 show ip ospf database 
 
 ![alt text](img/image-43.png)
+![alt text](img/image-58.png)
 
         5.3 show ip ospf interface brief
 
 ![alt text](img/image-44.png)
 
 
-        5.4 (TODO- colocar screenshot quando tiver configurado)show ip ospf neighbor
+        5.4 show ip ospf neighbor
 
 ![alt text](img/image-45.png)
 
@@ -541,7 +538,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 ![alt text](img/image-41.png)
 
     5. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n)
-        5.1 router opsf 1
+        5.1 router ospf 1
         5.2 router-id 2.0.0.7
 
     4. Definir quais interfaces fazem  parte do OSPF e associar custo 
@@ -551,7 +548,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
      
         
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        4.4 auto-cost reference-bandwidth 10000 
+        4.4 auto-cost reference-bandwidth 1000 
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
 
@@ -567,7 +564,6 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ![alt text](img/image-46.png)
 
-
         5.3 show ip ospf interface brief
 
 ![alt text](img/image-47.png)
@@ -581,8 +577,6 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 
 ### R8 ✅
-
-
 
     0. Configurar hostname ✅
         0.1 enable
@@ -619,7 +613,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 ![alt text](img/image-49.png)
 
     5. Definir router id (No AS2, cada router Rn deve usar como ID 2.0.0.n) ✅
-        5.1 router opsf 1
+        5.1 router ospf 1
         5.2 router-id 2.0.0.8
 
     6. Definir quais interfaces fazem  parte do OSPF e associar custo 
@@ -629,7 +623,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
      
         
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        6.4 auto-cost reference-bandwidth 10000 
+        6.4 auto-cost reference-bandwidth 1000 
         
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
@@ -666,7 +660,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ### R9 
 
-**duvida**: porque que aqui nos usamos apenas uma instancia opsf e no R2 usamos 2? (eu penso que se deva ao facto de R2 estar em duas area 0 *backbone* distintas, enquanto que outros routers como o caso de R6 e R9 podem ter interfaces em diferentes areas, mas nenhuma delas é area 0 *backbone*)
+**duvida**: porque que aqui nos usamos apenas uma instancia ospf e no R2 usamos 2? (eu penso que se deva ao facto de R2 estar em duas area 0 *backbone* distintas, enquanto que outros routers como o caso de R6 e R9 podem ter interfaces em diferentes areas, mas nenhuma delas é area 0 *backbone*)
 
     0. Configurar hostname ✅
         0.1 enable
@@ -709,7 +703,7 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         5.4 router-id 2.0.0.9
      
         (custo =Deve mudar a largura de banda de referência de modo a que seja atribuído o custo 10 a cada ligação FastEthernet. )
-        5.5 auto-cost reference-bandwidth 10000 
+        5.5 auto-cost reference-bandwidth 1000 
         
         (site para descobrir wildcard: https://jodies.de/ipcalc?host=0.0.0.0&mask1=24&mask2=)
         5.6 network 172.20.1.8  0.0.0.3 area 2
@@ -726,11 +720,11 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
         6.2 show ip ospf database 
 
 ![alt text](img/image-55.png)
+![alt text](img/image-59.png)
 
         6.3 show ip ospf interface brief
 
 ![alt text](img/image-56.png)
-
 
         6.4 show ip ospf neighbor
 
@@ -748,3 +742,6 @@ Para testar a conectividade temos de:
 
 + Fazer ping dos terminais para cada uma das interfaces do router
 + Se algum der problemas devemos ir a esse mesmo router e verificar a b.d do ospf correspondente
+
+
+![alt text](img/image-60.png)
