@@ -383,8 +383,9 @@ R: A **primeira vez que fazemos um traceroute** para um terminal não existente 
 
 #### a. Faça ping -c 1 192.180.40.55 e capture o resultado do ping. (capRes)
 
-    -No wireshark utilizar filtro (icmp or arp)
-![alt text](img/image-28.png) 
+    -No wireshark utilizar filtro (icmp or arp) 
+    
+**Nota**: O Arp faz 3 pedidos antes de devolver o erro ```Host Unreachable```
 
 ![alt text](img/image-26.png)
 
