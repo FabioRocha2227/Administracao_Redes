@@ -1,5 +1,9 @@
 # Trabalho 2 - Encaminhamento dinâmico
 
+**duvida**: se tivermos apenas 2 router's numa rede ospf não é eleito DR nem BDR (por e.g SUB-REDE ENTRE R1 e R2), certo? 
+
+
+
 ![alt text](img/image.png)
 
 ![alt text](img/image-1.png)
@@ -11,10 +15,24 @@
 
 ![alt text](img/image-2.png)
 
+**duvida: Na figura abaixo tenho uma captura de um pacote ```DB Exchange``` de ```R2``` para ```R3``` porque é que o LSA que ele envia, tem como ```External LSA```  o lsa enviado por ```2.0.0.2```? (Os ```External LSA``` supostamente não é enviado por ```ASBR's``` que ligam ```sistemas externos ao sistema OSPF```?)**
+![alt text](duvida.png)
+
+**duvida: no pacote ```LS Update``` capturado no momento em que R2 é ligado, esta um listado um ```Network LSA ``` vindo de ```2.0.0.3```.Supostamente os ```Network LSA``` não são só enviados em redes de acesso multiplo?(e que R2 e R3 não formam uma rede de acesso multiplo, certo?)**
+
+![alt text](duvida-2.png)
+
+**duvida: Acontece algo semelhante a duvida de cima (no caso de pacote ```LS Update``` de ```R2``` para ```R1```, quando ```R1``` liga-se , aparecem como ```External LSA``` os ```LSA's request's``` vindos de ```R2```)**
+
+![alt text](duvida-3.png)
 
 **duvida: ```DB Description``` <=> ```DB Exchange```?**
+> R: No processo ```DB Exchange``` são trocados pacotes DB Description ```DB Description```
 
 **duvida: porque que o hello packet do ospf tem como endereço destino o ```224.0.0.5```?**
+
+>R: Para reduzir o tráfego de encaminhamento , em redes broadcast ou ponto-a-ponto os LSA são enviados em multicast. (224.0.0.5 (“todos os routers OSPF”) para o DR enviar para os outros)
+
 
 **Explicação**:
 
@@ -24,7 +42,8 @@
 
     + **Descoberta de vizinhos**
 
-    + Verificar existência de **comunicação bidireccional** entre **vizinhos**
+    + Verificar existência de **comunicação bidireccional** entre **vizinhos** (quando um router vê o seu Router ID num Hello recebido ,sabe que tem comunicação bidireccional com o vizinho que
+    o enviou)
 
     + **Eleição** de ```DR``` e ```BDR``` 
 
@@ -33,11 +52,12 @@
 
 + ```DB Description```: corresponde a 'mensagens' ospf que demonstram a sincronização de **base dados topologicas** entre ```R2``` e ```R3``` (occore porque R2 acabou-se de ligar a rede) 
 
-+ ```LS Request```: Após ser concluido o processo de ```DB Exchange``` entre ```R2``` e ```R3```, se ```R2``` precisar de um ou mais **LSA** do vizinho ```R3```, pede-os usando ```LS Request``` 
++ ```LS Request```: Após ser concluido o processo de ```DB Exchange``` entre ```R2``` e ```R3```, se ```R2``` precisar de um ou mais **LSA** do vizinho ```R3``` (ou vice-versa), pede-os usando ```LS Request``` (a resposta vem em ```LS Update's``` que vão conter os ```LSA``` pedidos) 
 
     + Estado ```Loading``` (ainda tem informação por carregar)
     
     + Estado ```Full``` (adjacencia esta completa)
+
 
     
 ![alt text](img/image-3.png)
@@ -56,7 +76,7 @@
 
     Qual é o objectivo principal da troca destes pacotes?
 
-    R: Sincronização de base de dados topologica de 2 routers
+    R: Sincronização de base de dados topologica de 2 routers, que querem estabelecer adjacencia.
 
     Por que razão é necessário trocá-los sempre que um router estabelece novas adjacências (por exemplo, quando arranca)
 
@@ -69,18 +89,22 @@
     Para que servem estes pedidos?
     
     R: Concluído o processo DB Exchange, se o router precisar de um
-    ou mais LSA do vizinho, pede-os usando mensagens LS Request
+    ou mais LSA do vizinho , pede-os usando mensagens LS Request
 
     Como é que cada router sabe o que precisa de pedir ao vizinho? 
 
-    R: duvida: não tenho acerteza disto, perguntar ao professor
+    R: duvida: não tenho acerteza disto, perguntar ao professor (penso que seja por cada router ver que falta informação na sua base dados topologica apos a troca DB Exchange com o vizinho estar completa)
 
 ```LS Request``` de ```R3``` para ```R2``` 
+
++ ```R3``` pede a ```R2``` os ```LSA``` que estão em falta na sua B.D topologica
 
 ![alt text](img/image-6.png)
 
 
 ```LS Request``` de ```R2``` para ```R3```
+
++ ```R2``` pede a ```R3``` os ```LSA``` que estão em falta na sua B.D topologica
 
 ![alt text](img/image-7.png)
 ![alt text](img/image-8.png)
@@ -118,7 +142,9 @@
 ![alt text](img/image-11.png)
 
     (TODO confirmar resposta) 
-    R: Router LSA que anuncia a ligação ponto-a-ponto com R8 através da interface 172.20.1.14.També anuncia Stub Network à sub-rede correspondente a ligação ponto-a-ponto (172.20.1.12) 
+    R: Router LSA que anuncia a ligação ponto-a-ponto com R8 através da interface 172.20.1.14.També anuncia Stub Network à sub-rede correspondente a ligação ponto-a-ponto (172.20.1.12).
+
+>Nota: Uma ligação ```ponto-a-ponto``` **numerada** aparece na ```base de dados topologica``` como:  uma ligação ```ponto-a-ponto``` mais uma ligação ```Stub``` à ```sub-rede``` correspondente
 
 
 #### b. Compare as ligações que R6 anuncia nas áreas 1 e 2 e relacione-as com o tipo da ligação que R6 tem em cada uma dessas áreas. (texRes)
@@ -179,6 +205,8 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
     suas ligações
 
     Network Summary LSA: Injectados pelo ABR numa área para anunciar destinos de outras areas 
+
+**duvida**: Os pacotes OSPF  ```ASBR Summary LSA``` e  ```AS-External LSA```, não são trocados apenas entre ```sistemas que estão fora do dominio OSPF```? (é que quer ```R8``` quer ```R9``` estão dentro do dominio OSPF, e mesmo assim trocam estes pacotes no ```LS Update```)
 
     ASBR Summary LSA : permitem tornar o grafo conexo (Sem eles, os destinos importados por ASBR fora da própria área seriam conhecidos mas inatingíveis)
 
@@ -299,8 +327,11 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 ![alt text](img/image-24.png)
 
+**duvida**: Neste trabalho a unica ```rede de acesso multiplo``` é R3, R4, R5 e R6? (senão, **como é que definimos** uma ```rede de acesso multiplo```)
+
     Em que situação é gerado esse tipo de LSA? (texRes)
 
+    
     TODO - confirmar resposta
 
     R: É enviado pelo DR de cada rede acesso multiplo, e representa o nó virtual da correspondente rede (inclui lista de router's ligado, Router ID)
