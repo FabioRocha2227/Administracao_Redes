@@ -1,8 +1,14 @@
 # Trabalho 2 - Encaminhamento dinâmico
 
+**NOTA IMPORTANTE**:
+
++ ```Redes FastEthernet``` , ou seja  ligações em que usamos ```FastEthernet```, são consideradas ```redes de acesso multiplo```
+
+****
+
 **duvida**: se tivermos apenas 2 router's numa rede ospf não é eleito DR nem BDR (por e.g SUB-REDE ENTRE R1 e R2), certo? 
 
-
+>R: Sim é na mesma eleito DR e BDR , até porque mais tarde podem se adicionar mais routers (NOTA: redes fastEthernet, são redes de acesso multiplo, ou seja, temos o exemplo da sub-rede que temos entre R2 e R3, que é de acesso multiplo, porque podemos ter-los ligados diretamente, mas tambem podemos ter um switch em que se podem ligar mais computadores)
 
 ![alt text](img/image.png)
 
@@ -18,11 +24,17 @@
 **duvida: Na figura abaixo tenho uma captura de um pacote ```DB Exchange``` de ```R2``` para ```R3``` porque é que o LSA que ele envia, tem como ```External LSA```  o lsa enviado por ```2.0.0.2```? (Os ```External LSA``` supostamente não é enviado por ```ASBR's``` que ligam ```sistemas externos ao sistema OSPF```?)**
 ![alt text](duvida.png)
 
+>R: Esse ```External LSA``` corresponde ao sistema autonomo AS 1 ( representado a laranja na figura).É importante notar que AS1 e AS2 são dois sistemas autonomos distintos e o ```R2``` é o seu ASBR
+
 **duvida: no pacote ```LS Update``` capturado no momento em que R2 é ligado, esta um listado um ```Network LSA ``` vindo de ```2.0.0.3```.Supostamente os ```Network LSA``` não são só enviados em redes de acesso multiplo?(e que R2 e R3 não formam uma rede de acesso multiplo, certo?)**
+
+>R: redes fastEthernet (basicamente são todos as redes que utilizam cabos fastEthernet) são redes de acesso multiplo. (e.g. R1 e R2 são uma rede de acesso multiplo)
 
 ![alt text](duvida-2.png)
 
 **duvida: Acontece algo semelhante a duvida de cima (no caso de pacote ```LS Update``` de ```R2``` para ```R1```, quando ```R1``` liga-se , aparecem como ```External LSA``` os ```LSA's request's``` vindos de ```R2```)**
+
+> R: Porque R2 pertence a dois sistema autonomos OSPF, e no caso esta a redistribuir a parte do sistema autonomo AS2 para AS1
 
 ![alt text](duvida-3.png)
 
@@ -93,7 +105,7 @@
 
     Como é que cada router sabe o que precisa de pedir ao vizinho? 
 
-    R: duvida: não tenho acerteza disto, perguntar ao professor (penso que seja por cada router ver que falta informação na sua base dados topologica apos a troca DB Exchange com o vizinho estar completa)
+    R: Após o processo DB Exchange estar completo, ambos os vizinhos sabem quais LSA's precisam pedir aos seus vizinhos via LS Request
 
 ```LS Request``` de ```R3``` para ```R2``` 
 
@@ -150,7 +162,12 @@
 #### b. Compare as ligações que R6 anuncia nas áreas 1 e 2 e relacione-as com o tipo da ligação que R6 tem em cada uma dessas áreas. (texRes)
 
 
-    R: duvida - (penso que tenha haver com o facto de R8 ter uma ligação via porta serie e R7 ter ligação porta ethernet, mas pedir ao professor ajuda para compreender)
+    R: 
+
+    Area 0 e Area 1: Indicam as ligações de transito a que estão ligadas
+
+    Area 2: Como temos uma ligação ponto-a-ponto numerada (utilizando cabo serie) temos que associar uma stub-network para ser possivel outras maquinas comunicarem com as interfaces numeradas nesta rede ponto-a-ponto
+
 
 
 ![alt text](img/image-13.png)
@@ -167,6 +184,8 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 #### b. Explique detalhadamente cada um dos LSA enviados por R8 a R6. (capRes + texRes)
 
 **duvida: quando diz para ter os LSA enviados de ```R8``` para ```R6```, esta se a referir os pacotes com endereço origem ```172.20.1.13```  e endereço destino ```224.0.0.5``` (não tinha pacotes com endereço origem ```172.20.1.13``` e endereço destino ```172.20.1.14```)**
+
+>R: sim 
 
 > NOTA: Pode parar agora a captura.
 
@@ -185,7 +204,6 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 
 #### c. Comece agora uma captura na ligação entre R8 e R9. Inicie R9 e capture a mensagem que permite a este router saber que tem comunicação bidireccional com R8. Justifique a escolha dessa mensagem (capRes + texRes).
-    (TODO- confirmar se é o Hello Packet vindo de 172.20.1.9 (R9))
 
     R: Para verificar a existencia de comunicação bidirecional entre vizinhos o ospf utiliza o sub protocolo Hello.
 
@@ -208,10 +226,12 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 **duvida**: Os pacotes OSPF  ```ASBR Summary LSA``` e  ```AS-External LSA```, não são trocados apenas entre ```sistemas que estão fora do dominio OSPF```? (é que quer ```R8``` quer ```R9``` estão dentro do dominio OSPF, e mesmo assim trocam estes pacotes no ```LS Update```)
 
+>R: Sim mas estes pacotes ```ASBR Summary LSA``` e ```AS-External LSA``` originam no sistema autonomo AS1 (e vem do router ```2.0.0.2```, propagados pelo sistema OSPF)
+
     ASBR Summary LSA : permitem tornar o grafo conexo (Sem eles, os destinos importados por ASBR fora da própria área seriam conhecidos mas inatingíveis)
 
 
-    AS-External LSA: Representam destinos externos ao sistema autónomo OSPF (rotas importadas por um ASBR( Autonomous System Boundary Router))
+    AS-External LSA: Representam destinos externos ao sistema autónomo OSPF (rotas importadas por um ASBR( Autonomous System Boundary Router)), neste caso vem do sistema autonomo AS1
 
 
 
@@ -329,17 +349,14 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 **duvida**: Neste trabalho a unica ```rede de acesso multiplo``` é R3, R4, R5 e R6? (senão, **como é que definimos** uma ```rede de acesso multiplo```)
 
+>R: ```Não```, e temos mais redes de acesso multiplo, por e.g todas as ```conexões FastEthernet``` que temos entre **2 ou mais** router's ou mais formam uma rede de acesso multiplo , porque mais tarde podem-se ligar a essas redes mais maquinas utilizando um ```Switch``` (e.g. da rede que contem R3,R4,R5 e R6 que tem uma rede de acesso multiplo demonstrada explicitamente)
+
     Em que situação é gerado esse tipo de LSA? (texRes)
-
     
-    TODO - confirmar resposta
-
     R: É enviado pelo DR de cada rede acesso multiplo, e representa o nó virtual da correspondente rede (inclui lista de router's ligado, Router ID)
 
 
 #### c. Que relação existe entre o originador de um Network LSA e o DR da ligação correspondente? (texRes)
-
-    TODO - confirmar resposta
 
     R: Network LSA é :
         • Enviado pelo DR de cada rede de acesso múltiplo
@@ -387,7 +404,7 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 + nr adjacencias: 3
 
-    + Papel: BDR (Back Up DR, portanto tem as mesmas adjacencias que o DR)
+    + Papel: BDR (Back Up DR, portanto tem as mesmas adjacencias que o DR, excetuando a adjcencia que DR tem com BDR, neste caso temos adjacencia do BDR com DR)
 
 ```R6```
 
@@ -406,11 +423,21 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 
 duvida: é suposto falhar o traceroute?
+>R: Sim, basicamente quando cortamos a ligação entre R6 e R7 não temos forma como chegar ao terminal 2.A primeira parece que existe um caminho alternativo via R9, mas como só o ABR (neste caso R6) é que poderia injetar essa informação para o ospf e o unico contacto com esse ABR é por o R7, isso deixa de ser possivel.
+
+>Também pensei que o router R9 podia injetar esses sumarios pela rede, mas apenas o ```ABR``` pode fazer isto
+
+>Para confirmar o que o ```R9``` esta a 'enviar' para ```R6``` (ou qualquer outro Router) podemos correr o comando show ip ospf database router 2.0.0.9 (ou o id que queremos ver ).Na imagem abaixo apenas contem a porção vinda da area 2 
+
+
+![alt text](image.png)
+
 
 > cortar ligação entre R6 e R7 
 
 ![alt text](img/image-29.png)
 
+>No caso abaixo, a informação que não temos forma de chegar ao term2 já se propagou pela rede (portanto nem sai do primeiro roiter)
 ![alt text](img/image-30.png)
 
 
@@ -424,6 +451,8 @@ duvida: é suposto falhar o traceroute?
 
 
     R: duvida- não percebi qual alteração se refere, penso que seja a alteração de rota para pacote atravesar R8 e R9 , mas não percdbi o porque de não chegar ao terminal 2
+
+>R: Mais acima tem a justificação em concreto, mas basicamente não temos informação para chegar lá
 
 
 >Reponha a ligação entre R6 (F1/1) e R7 (F1/0).
@@ -445,9 +474,11 @@ duvida: é suposto falhar o traceroute?
 
     Diga qual é o caminho seguido pelos pacotes ICMP echo request e echo reply e explique porquê
 
-    R: duvida: não consigo identificar o caminho do pacote apenas por ICMP (é suposto usar o trace?)
 
-duvida: se fizer trace da-me para 172.17.0.1 apartir do terminal da-me erro de port unreachable (mas o ping funciona)
+    R: 
+    Basicamento o echo request vai por R7 -> R6 -> R8 -> R9 (porque so conhecemos a rede 172.17.0.1 , que esta numa area diferente da area que originou o ping), e apenas o ABR (R6) e que tem essa informação, e ele mesmo injetou esses sumarios a indicar que conhece a rede 172.17.0.1 (mesmo que 172.17.0.1 esteja no R9, essa interface esta numa area diferente logo não é utilizado num caminho de ida).
+
+    O echo reply vai por R9->R7 , porque quando chegamos a R9 e vemos as 'possiveis' rotas, vemos que existe uma rota intra-area, que é sempre preferida em contraposicação a qualquer outra
 
 
 #### b. Tente alterar em R9 o custo da interface 172.20.1.6 de modo a que o percurso do echo reply seja o inverso do do echo request. Se conseguiu, diga como; se não conseguiu, explique porquê (texRes).

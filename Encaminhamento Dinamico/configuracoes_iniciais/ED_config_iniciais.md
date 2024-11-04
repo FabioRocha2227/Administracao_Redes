@@ -2,7 +2,11 @@
 
 **duvida**: porque é que em certos routers nos fazemos o uso de **redistribute** e noutros não?? 
 
+>R: So fazemos uso de redistribute em casos que queremos importar rotas de um sistema externo (pode ser: outro sistema ospf, sistema RIP,etc..)
+
 **duvida**: o **redistribute** é necessario no r2 para o funcionamento do ospf?
+
+>R: Como o router R2 é um ASBR que connecta dois sistemas autonomos ospf distintos, para ambos os sistemas autonomos (AS 1 e AS 2) terem informação sobre  as rotas que contem, devem importa-las com redistribute .
 
 **NOTAS IMPORTANTES:**
 
@@ -429,7 +433,10 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 **duvida**: porque é que aqui não usamos network e usamos ip ospf <id> area <numero_area>? 
 
-**duvida**: porque é que aqui so basta uma instancia ospf? (penso que se deve ao facto que não estamos a definir o ospf com network mas sim por interface com o comando ip ospf <id> area <numero_area> mas confirmar)
+> R: so para mostrar que isso e possivel, mas seria possivel utilizar apenas network
+
+**duvida**: porque é que aqui so basta uma instancia ospf? 
+> R: Aqui so basta uma instancia ospf porque estamos no mesmo sistema autonomo (AS2). So precissamos de mais instancias ospf quando o router esta em diferentes sistemas autonomos ospf (e.g. no router 2 temos 2 instancias OSPF, AS1 e AS2)
 
     0. Configurar hostname ✅
         0.1 enable
@@ -660,7 +667,9 @@ No emulador de rede GNS3 dentro da VM a correr no sistema de virtualização dev
 
 ### R9 
 
-**duvida**: porque que aqui nos usamos apenas uma instancia ospf e no R2 usamos 2? (eu penso que se deva ao facto de R2 estar em duas area 0 *backbone* distintas, enquanto que outros routers como o caso de R6 e R9 podem ter interfaces em diferentes areas, mas nenhuma delas é area 0 *backbone*)
+**duvida**: porque que aqui nos usamos apenas uma instancia ospf e no R2 usamos 2?
+
+> R:Aqui so basta uma instancia ospf porque estamos no mesmo sistema autonomo (AS2). So precissamos de mais instancias ospf quando o router esta em diferentes sistemas autonomos ospf (e.g. no router 2 temos 2 instancias OSPF, AS1 e AS2)
 
     0. Configurar hostname ✅
         0.1 enable
