@@ -421,6 +421,9 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 ### 6. Faça um traceroute (comando trace no VPCS) do terminal 1 para o terminal 2. Corte a ligação entre R6 e R7 (apenas para esta pergunta) de modo a que o percurso dos pacotes seja desviado para atravessar R8 e R9 e repita o traceroute. (2×outRes)
 
+>Screenshot antes de cortar ligação entre R6 e R7 (no router R6 corri o comando ```show ip ospf database router 2.0.0.7``` para verificar o que ```R7``` anuncia para ```R6``` através do seu ````Router LSA```). Verificamos que a rede ```172.16.1.0/24``` so é anunciado por ```R7``` e é injetada atraves de um sumario (```Network Summary LSA```) por o ABR R6 para as restantes áreas.
+
+![alt text](image-1.png)
 
 duvida: é suposto falhar o traceroute?
 >R: Sim, basicamente quando cortamos a ligação entre R6 e R7 não temos forma como chegar ao terminal 2.A primeira parece que existe um caminho alternativo via R9, mas como só o ABR (neste caso R6) é que poderia injetar essa informação para o ospf e o unico contacto com esse ABR é por o R7, isso deixa de ser possivel.
@@ -437,8 +440,14 @@ duvida: é suposto falhar o traceroute?
 
 ![alt text](img/image-29.png)
 
->No caso abaixo, a informação que não temos forma de chegar ao term2 já se propagou pela rede (portanto nem sai do primeiro roiter)
+>No caso abaixo, a informação que não temos forma de chegar ao term2 já se propagou pela rede (portanto nem sai do primeiro router)
+
 ![alt text](img/image-30.png)
+
+
+>Se verificarmos como o comando ```show ip ospf database router 2.0.0.7``` no ```R6``` verificamos que ainda temos a informação de que para chegar a ```172.16.1.2``` temos de usar ```R7```, mas aparece como ```Router is not reachable``` (se verificarmos os restantes ```show ip ospf database router 2.0.0.x```, confirmamos que nenhum delese conhece a rede ```172.16.1.0/24```)
+![alt text](image-2.png)
+
 
 
 #### a. Em R6, corra o comando show ip ospf database. (outRes)
