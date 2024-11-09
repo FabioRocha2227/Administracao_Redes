@@ -378,6 +378,9 @@ R: A **primeira vez que fazemos um traceroute** para um terminal não existente 
 
 ![alt text](img/image-30.png)
 
+> Esquema que explica ```ICMP redirect que ocorre no tracroute``` 
+![alt text](image.png)
+
 
 ### 2. ARP. Inicie uma captura na ligação de Term2 ao switch da sub-rede 192.180.40.0/24.
 
