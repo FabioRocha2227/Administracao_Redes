@@ -4,6 +4,8 @@
 
 + ```Redes FastEthernet``` , ou seja  ligações em que usamos ```FastEthernet```, são consideradas ```redes de acesso multiplo```
 
++ No trabalho temos ```2 sistemas autonomos OSPF``` e um deles esta dividido em ```3 áreas``` 
+
 ****
 
 **duvida**: se tivermos apenas 2 router's numa rede ospf não é eleito DR nem BDR (por e.g SUB-REDE ENTRE R1 e R2), certo? 
@@ -88,15 +90,29 @@
 
     Qual é o objectivo principal da troca destes pacotes?
 
+    (nossa resposta)
     R: Sincronização de base de dados topologica de 2 routers, que querem estabelecer adjacencia.
 
     Por que razão é necessário trocá-los sempre que um router estabelece novas adjacências (por exemplo, quando arranca)
 
     R: Para garantir que o router e o vizinho com que é estabelecida a adjacência, tem a base dados topológica idêntica
 
+    (Resposta do professor)
+    O objetivo principal dos pacotes DD (sub-protocolo DB Exchange) é cada router enviar
+    meta-informação sobre todos os LSA que tem na sua B.D topologica para que se faltar 
+    ao vizinho algum algum desses LSA ele possa pedi-lo (LS Request).Ao estabelecer
+    adjacencia é necessário sincronizar as B.D topologicas para garantir que todos os 
+    router's usam exatamente a mesma B.D topologica para que o calculo de caminhos mais 
+    curtos seja consistente.
+
+    
+
+
 ![alt text](img/image-5.png)
 
 #### b. Observe agora o conteúdo dos pacotes LS Request enviados por R2 a R3 e vice-versa. Para que servem estes pedidos? Como é que cada router sabe o que precisa de pedir ao vizinho? (texRes)
+
+    (nossa resposta) 
 
     Para que servem estes pedidos?
     
@@ -106,6 +122,12 @@
     Como é que cada router sabe o que precisa de pedir ao vizinho? 
 
     R: Após o processo DB Exchange estar completo, ambos os vizinhos sabem quais LSA's precisam pedir aos seus vizinhos via LS Request
+
+    (Resposta do professor)
+
+    Os pacotes LS Request servem para um router pedir ao vizinho LSA que ainda não tem ou dos quais tem uma
+    versão não atualizada. O router sabe o que precissa pedira ao vizinho comparando os LS Header's que ele
+    lhe enviou nos pacotes DD com o conteúdo da sua própria B.D topologicas.
 
 ```LS Request``` de ```R3``` para ```R2``` 
 
@@ -136,7 +158,6 @@
 
 ![alt text](img/image-9.png)
 
-    (TODO confirmar resposta) 
     R: Router LSA que anuncia a ligação de transito (Link Id = 192.168.100.2 = Link Data).Também indica que é um Area Border Router.
 
 
@@ -145,7 +166,6 @@
 
 ![alt text](img/image-10.png)
 
-    (TODO confirmar resposta) 
     R: Router LSA que anuncia a ligação de transito (Link Id = 172.20.1.2
     e Link Data = 172.20.1.1).Também indica que é um Area Border Router.
 
@@ -153,8 +173,7 @@
 
 ![alt text](img/image-11.png)
 
-    (TODO confirmar resposta) 
-    R: Router LSA que anuncia a ligação ponto-a-ponto com R8 através da interface 172.20.1.14.També anuncia Stub Network à sub-rede correspondente a ligação ponto-a-ponto (172.20.1.12).
+    R: Router LSA que anuncia a ligação ponto-a-ponto numerada com R8 através da interface 172.20.1.14.Como a ligação ponto-a-ponto é numerada, também anuncia Stub Network à sub-rede correspondente a ligação ponto-a-ponto (172.20.1.12).
 
 >Nota: Uma ligação ```ponto-a-ponto``` **numerada** aparece na ```base de dados topologica``` como:  uma ligação ```ponto-a-ponto``` mais uma ligação ```Stub``` à ```sub-rede``` correspondente
 
@@ -176,7 +195,9 @@
 
 #### a. Diga o que aconteceu em R8 ao estado do vizinho R9 e qual foi o evento que ocorreu nesse instante e desencadeou essa mudança (texRes)
 
-TODO: confirmar resposta dada (fiz resposta na img/imagem)
+
+>Nota: ele descobre que R9 está desligado porque ele deixou de responder aos pacotes ```Hello```
+
 ![alt text](img/image-12.png)
 
 
@@ -206,32 +227,43 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 #### c. Comece agora uma captura na ligação entre R8 e R9. Inicie R9 e capture a mensagem que permite a este router saber que tem comunicação bidireccional com R8. Justifique a escolha dessa mensagem (capRes + texRes).
 
     R: Para verificar a existencia de comunicação bidirecional entre vizinhos o ospf utiliza o sub protocolo Hello.
+    Portanto quando R8 envia o Pacote Hello e lista o R9 como Active neighbour, o R9 sabe que tem conectividade com R8 
+    e tem comunicação biderecional com ele 
 
+>Nota: O ```primeiro pacote Hello```  em que um router se ve listado como ```Active neihgbour``` por um vizinho, permite ao router afirmar que ```tem comunicação bidirecional com esse vizinho```
+ 
 ![alt text](img/image-17.png)
 
+>Nota: Um router também pode afirmar que ```tem comunicação bidirecional com um vizinho``` se lhe estiver a enviar pacotes ```DB Description```
+
+![alt text](image-3.png)
 
 #### d. Continue a captura da alínea anterior até o encaminhamento OSPF estabilizar. Analise todos os anúncios (LSA) contidos em todas as mensagens LS Update trocadas entre R8 e R9. Que tipos de anúncio encontrou? Para que serve cada um desses tipos? (texRes)
 
     Que tipos de anúncio encontrou?
 
-    R: Router LSA, Network Summary LSA , ASBR Summary LSA e AS External LSA
+    R: Router LSA,Network LSA, Network Summary LSA , ASBR Summary LSA e AS External LSA
 
     Para que serve cada um desses tipos? 
 
     R: 
     Router LSA: Serve para cada router se anunciar e identificar as
-    suas ligações
+    suas ligações (Intra-área)
 
-    Network Summary LSA: Injectados pelo ABR numa área para anunciar destinos de outras areas 
+    Network LSA: Originado pelo DR numa rede de acesso multiplo para anunciar o nó virtual
+    que permite tranformar uma ligação de acesso multiplo num grafo (também contém informação
+    sobre quais router's estão ligados a essa rede de acesso multiplo)
+
+    Network Summary LSA: Injectados pelo ABR numa área para anunciar destinos (redes Ip) de outras areas 
 
 **duvida**: Os pacotes OSPF  ```ASBR Summary LSA``` e  ```AS-External LSA```, não são trocados apenas entre ```sistemas que estão fora do dominio OSPF```? (é que quer ```R8``` quer ```R9``` estão dentro do dominio OSPF, e mesmo assim trocam estes pacotes no ```LS Update```)
 
 >R: Sim mas estes pacotes ```ASBR Summary LSA``` e ```AS-External LSA``` originam no sistema autonomo AS1 (e vem do router ```2.0.0.2```, propagados pelo sistema OSPF)
 
-    ASBR Summary LSA : permitem tornar o grafo conexo (Sem eles, os destinos importados por ASBR fora da própria área seriam conhecidos mas inatingíveis)
+    ASBR Summary LSA : permitem tornar o grafo conexo (Sem eles, os destinos importados por ASBR fora da própria área seriam conhecidos mas inatingíveis). Resumidamente indicam , em cada área, como chegar ao ASBR .
 
 
-    AS-External LSA: Representam destinos externos ao sistema autónomo OSPF (rotas importadas por um ASBR( Autonomous System Boundary Router)), neste caso vem do sistema autonomo AS1
+    AS-External LSA: Representam destinos externos ao sistema autónomo OSPF (rotas importadas por um ASBR( Autonomous System Boundary Router)), neste caso vem do sistema autonomo AS1.
 
 
 
@@ -246,10 +278,20 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 + Advertising Router : router que envia este Router LSA
 
-+ type : o tipo de Router LSA (Ponto-a-ponto, Ligação de trânsito, Ligação stub (ponta) e  Ligação virtual )
++ type : o tipo de Router LSA e respetivos Link Id e Link Data(Ponto-a-ponto, Ligação de trânsito, Ligação stub (ponta) e  Ligação virtual )
 
-+ etc...
 
+```Network LSA```
+
+![alt text](image-4.png)
+
++ Link State Id: endereço ip da interface DR nessa rede 
+
++ Advertising Router: ID do DR da rede 
+
++ NetMask: Máscara da rede de acesso multiplo 
+
++ Attached Router: Id de cada um dos router's ligados à rede de acesso multiplo
 
 ```Network Summary LSA```
 
@@ -259,8 +301,7 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 + Advertising Router : router que envia este Network Summary LSA
 
-+ etc ...
-
++ NetMask: Máscara da rede de destino acesso multiplo
 
 ```ASBR Summary LSA```
 
@@ -268,11 +309,9 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 + Link State ID : Router ID do ASBR em questão
 
-+ Advertising Router : router que envia este ASBR Summary LSA
++ Advertising Router : ID do ASBR
 
 + Netmask: 0.0.0.0 (sempre assim)
-
-+ etc ...
 
 ```AS-External LSA```
 
@@ -282,11 +321,7 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 + Advertising Router : router que envia este AS-External LSA
 
-+ Netmask : mascara associada ao Link State Id
-
-+ External type:  indica se é uma rota externa de tipo 1 ou 2
-
-+ etc ...
++ Netmask : mascara da rede destino
 
 #### f. Procure o último anúncio do tipo Router LSA originado pelo router R8. Para cada uma das ligações identificadas nesse anúncio, indique o respectivo tipo, bem como os valores dos campos ID e Data e o seu significado. (texRes)
 
@@ -313,12 +348,14 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
 ```Stub```
 
-    + Link ID: 172.18.1.0 (Prefixo da rede)
++ Link ID: 172.18.1.0 (Prefixo da rede)
 
 + Data: 255.255.255.0 (Máscara de rede)
 
 
 #### g. Volte a iniciar R7 e aguarde até o encaminhamento estabilizar. Que notificações (LSA) foram enviadas por R8 a R9? Indique a finalidade de cada uma dessas notificações. (texRes)
+
+    (nossa resposta)
 
     Que notificações (LSA) foram enviadas por R8 a R9?
 
@@ -329,6 +366,14 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
     TODO: confirmar com o professor a resposta abaixo
 
     R: Basicamente os LS Update traz a informação relacionada com o arranque do R7, atualizando a base de dados topologica de R8 e R9. LS Acknowlege server para confirmar o recebimento desses LSA.
+
+    (Resposta do professor)
+
+> Ver imagem abaixo com resposta do professor (captura de o LS Update)
+
+![alt text](image-5.png)
+
+
 
 
 ### 4. Em cada uma das interfaces do R8 corra o comando show ip ospf interface e verifique se na ligação correspondente foi eleito um Designated Router. (outRes)
@@ -341,30 +386,32 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 
     duvida: Na interface se2/0 não tenho acerteza o porque de não ter um DR (é por ter sempre adjacencia?)
 
-    R: fa1/1 e fa1/0 foi eleito como DR.No Se2/0 é uma ligação P2P logo não precissa DR por é sempre estavelicido uma adjcência 
+> R: fa1/1 e fa1/0 foi eleito como DR (porque sao ligações FastEthernet, que é uma ligação de acesso multiplo).No Se2/0 é uma ligação P2P logo não precissa DR por é sempre estavelicido uma adjcência 
 
 #### b. Nas ligações em que existe DR, verifique se é gerado um Network LSA (pode correr em R8 o comando show ip ospf database network). Em que situação é gerado esse tipo de LSA? (texRes)
 
-![alt text](img/image-24.png)
 
 **duvida**: Neste trabalho a unica ```rede de acesso multiplo``` é R3, R4, R5 e R6? (senão, **como é que definimos** uma ```rede de acesso multiplo```)
 
 >R: ```Não```, e temos mais redes de acesso multiplo, por e.g todas as ```conexões FastEthernet``` que temos entre **2 ou mais** router's ou mais formam uma rede de acesso multiplo , porque mais tarde podem-se ligar a essas redes mais maquinas utilizando um ```Switch``` (e.g. da rede que contem R3,R4,R5 e R6 que tem uma rede de acesso multiplo demonstrada explicitamente)
 
+![alt text](img/image-24.png)
+
     Em que situação é gerado esse tipo de LSA? (texRes)
     
-    R: É enviado pelo DR de cada rede acesso multiplo, e representa o nó virtual da correspondente rede (inclui lista de router's ligado, Router ID)
+    R: É enviado pelo DR de cada rede acesso multiplo, e representa o nó virtual da correspondente rede (inclui lista de router's ligado, Router ID).É apenas gerado em ligações de transito (acesso multiplo)
+
 
 
 #### c. Que relação existe entre o originador de um Network LSA e o DR da ligação correspondente? (texRes)
 
-    R: Network LSA é :
+    R: Network LSA é  :
         • Enviado pelo DR de cada rede de acesso múltiplo
         • Representa o nó virtual correspondente à rede
         • Inclui lista de Routers ligados (Router ID)
             – Ligações do nó virtual para os routers reais
 
-
+    ()
 
 ### 5. Corra o comando show ip ospf interface <itf> nas interfaces de R3, R4, R5 e R6 ligadas à sub-rede 192.168.100.0
 
@@ -428,7 +475,7 @@ TODO: confirmar resposta dada (fiz resposta na img/imagem)
 duvida: é suposto falhar o traceroute?
 >R: Sim, basicamente quando cortamos a ligação entre R6 e R7 não temos forma como chegar ao terminal 2.A primeira parece que existe um caminho alternativo via R9, mas como só o ABR (neste caso R6) é que poderia injetar essa informação para o ospf e o unico contacto com esse ABR é por o R7, isso deixa de ser possivel.
 
->Também pensei que o router R9 podia injetar esses sumarios pela rede, mas apenas o ```ABR``` pode fazer isto
+>Também pensei que o router ```R9``` podia ```injetar esses sumarios pela rede```, mas apenas o ```ABR``` pode fazer isto (R6)
 
 >Para confirmar o que o ```R9``` esta a 'enviar' para ```R6``` (ou qualquer outro Router) podemos correr o comando show ip ospf database router 2.0.0.9 (ou o id que queremos ver ).Na imagem abaixo apenas contem a porção vinda da area 2 
 
@@ -436,7 +483,7 @@ duvida: é suposto falhar o traceroute?
 ![alt text](image.png)
 
 
-> cortar ligação entre R6 e R7 
+> cortar ligação entre R6 e R7 (informação que R6 e R7 não tem conexão ainda não se tinha propagado)
 
 ![alt text](img/image-29.png)
 
@@ -445,7 +492,7 @@ duvida: é suposto falhar o traceroute?
 ![alt text](img/image-30.png)
 
 
->Se verificarmos como o comando ```show ip ospf database router 2.0.0.7``` no ```R6``` verificamos que ainda temos a informação de que para chegar a ```172.16.1.2``` temos de usar ```R7```, mas aparece como ```Router is not reachable``` (se verificarmos os restantes ```show ip ospf database router 2.0.0.x```, confirmamos que nenhum delese conhece a rede ```172.16.1.0/24```)
+>Se verificarmos como o comando ```show ip ospf database router 2.0.0.7``` no ```R6``` verificamos que ainda temos a informação de que para chegar a ```172.16.1.2``` temos de usar ```R7```, mas aparece como ```Router is not reachable``` (se verificarmos os restantes ```show ip ospf database router 2.0.0.x```, confirmamos que nenhum delese conhece a rede ```172.16.1.0/24```). Também passa a sub-rede para uma ```Rede Stub``` (antes estava como ```Rede de trânsito```)
 ![alt text](image-2.png)
 
 
@@ -485,13 +532,19 @@ duvida: é suposto falhar o traceroute?
 
 
     R: 
-    Basicamento o echo request vai por R7 -> R6 -> R8 -> R9 (porque so conhecemos a rede 172.17.0.1 , que esta numa area diferente da area que originou o ping), e apenas o ABR (R6) e que tem essa informação, e ele mesmo injetou esses sumarios a indicar que conhece a rede 172.17.0.1 (mesmo que 172.17.0.1 esteja no R9, essa interface esta numa area diferente logo não é utilizado num caminho de ida).
+    Basicamento o echo request vai por Term2 -> R7 -> R6 -> R8 -> R9 (porque so conhecemos a rede 172.17.0.1 , que esta numa area diferente da area que originou o ping), e apenas o ABR (R6) e que tem essa informação, e ele mesmo injetou esses sumarios a indicar que conhece a rede 172.17.0.1 (mesmo que 172.17.0.1 esteja no R9, essa interface esta numa area diferente logo não é utilizado num caminho de ida).
 
-    O echo reply vai por R9->R7 , porque quando chegamos a R9 e vemos as 'possiveis' rotas, vemos que existe uma rota intra-area, que é sempre preferida em contraposicação a qualquer outra
+    O echo reply vai por R9->R7 , porque quando chegamos a R9 e vemos as 'possiveis' rotas, vemos que existe uma rota INTRA-área, que é sempre preferida em contraposicação a qualquer outra
 
 
 #### b. Tente alterar em R9 o custo da interface 172.20.1.6 de modo a que o percurso do echo reply seja o inverso do do echo request. Se conseguiu, diga como; se não conseguiu, explique porquê (texRes).
 
 > NOTA: Para perceber melhor a diferença entre o que se passa nesta pergunta e na pergunta anterior, pode experimentar também cortar a ligação entre R9 e R7.
 
-    R: duvida: pedir ajuda nesta parte 
+    (resposta do professor)
+    R: Configuramos a interface 172.20.1.6 o custo R9 para maximo (com o comando ip ospf cost valor_maximo).Contudo, mesmo que façamos isso, o echo reply vem na mesma por 172.20.1.6 porque se trata de uma rota INTRA-area (pelas preferencias ospf, as rotas INTRA-área são sempre preferidas em contraposição em qualquer rota)
+
+    (Se cortamos ligação entre R7 e R9, ele vai usar o camino INTER-área porque deixa de ter um caminho INTRA-área)
+
+
+> A informação ```INTRA-área``` (```todos osrouter's na mesma área tem a mesma B.D topologica```) é sempre mais precissa do que a ```INTER-área``` (```Router's de diferentes áreas apenas contém informação sumarizada de um e outro```)
