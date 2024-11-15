@@ -7,38 +7,38 @@
 
 + Antes de começar, verifique em cada um dos terminais que o ficheiro ```/etc/dhcp/dhclient.conf``` existe e contém a linha  **send dhcp-client-identifier = hardware;**.  Caso contrário, crie-o (numa shell de root) e acrescente essa linha.
 
-**Configurações inicias**
-+ ```Terminais``` 
+## Configurações inicias
 
-    + Devem ser configurados por DHCP
+### Terminais 
+
++ Devem ser configurados por DHCP
         
         1. ifconfig (verificar endereços)
         2. dhclient ```interface``` -v
 
-    
     + Devem ter a correr os servidores de SSH (sshd) e de FTP (proftpd)
-****
-    (em ambos os terminais)
-    Por a correr servidores SSH:
-        systemctl status sshd
-        (caso esteja desligado)
-        systemctl start sshd
-        systemctl enable sshd 
+        
+            (em ambos os terminais)
+            
+            Por a correr servidores SSH:
+                systemctl status sshd
+                (caso esteja desligado)
+                systemctl start sshd
+                systemctl enable sshd 
 
-    Por a correr servidores FTP:
-
-        systemctl status proftpd
-        systemctl enable proftpd
-        systemctl start proftpd
-
-
-
-+ ```Router Cisco (RCis)```
-
-    + A interface externa (f1/0) é configurada por DHCP. Pode ver que endereço lhe foi atribuído usando o comando  sh ip interface brief .
+            Por a correr servidores FTP:
+                systemctl status proftpd
+                systemctl enable proftpd
+                systemctl start proftpd
 
 
-    + A interface interna (f1/1) é configurada estaticamente.
+
+### Router Cisco (RCis)
+
++ A interface externa (f1/0) é configurada por DHCP. Pode ver que endereço lhe foi atribuído usando o comando  sh ip interface brief .
+
+
++ A interface interna (f1/1) é configurada estaticamente.
 
         1. enable 
         2. conf t 
@@ -62,70 +62,113 @@
         
         + Configure a duração das leases, que deverá ser sempre de 1 hora.
 
-        Configuração```RCis```  
-            1. enable 
-            2. conf t 
-            3. ip dhcp excluded-address 172.16.0.1 172.16.0.11
+        ```Configuração RCis```  
+        
+                1. enable 
+                2. conf t 
+                3. ip dhcp excluded-address 172.16.0.1 172.16.0.11
+                
+                (dynamic é apenas o nome dado a esta pool)
+                4. ip dhcp pool dynamic 
+                    4.1 network 172.16.0.0 255.255.255.0
+                    4.2 default-router 172.16.0.1
+                    4.3 dns-server 192.168.123.1
+                    4.4 domain-name  alunos.dcc.fc.up.pt
+                    4.5 lease 0 1 0
+                    4.6 exit
+                
+                5. ip dhcp pool manual
+                    5.1 host 172.16.0.11 255.255.255.0
+
+                    (verificar o MAC_TERM_1 com ifconfig no Term1 e remover os 00: no inicio)
+
+                    (0100:(....) indica que é o client identifier MAC ADDRESS)
+
+                    5.2 client-identifier 0100:MAC_TERM_1 
+                    5.3 client-name Term1
+                    5.4 lease 0 1 0
+
+                6. Guardar configurações
+                    6.1copy running-config startup-config
+
+                7. Verificar pool
+                    7.1 show ip dhcp pool
+
+![alt text](image-1.png)
+
+                    7.2 show ip dhcp binding
+
+![alt text](image-2.png)
+****
+
+```Configuração Term1```
             
-            (dynamic é apenas o nome dado a esta pool)
-            4. ip dhcp pool dynamic 
-                4.1 network 172.16.0.0 255.255.255.0
-                4.2 default-router 172.16.0.1
-                4.3 dns-server 192.168.123.1
-                4.4 domain-name  alunos.dcc.fc.up.pt
-                4.5 lease 0 1 0
-                4.6 exit
-            
-            5. ip dhcp pool manual
-                5.1 host 172.16.0.11 255.255.255.0
+    (remover configuração dhcp de uma dada interface)
+    1. sudo dhclient -r interface
 
-                (verificar o MAC_TERM_1 com ifconfig no Term1 e remover os 00: no inicio)
+    2. dhclient interface -v 
 
-                (0100:(....) indica que é o client identifier MAC ADDRESS)
+    3. ifconfig 
 
-                5.2 client-identifier 0100:MAC_TERM_1 
-                5.3 client-name Term1
-                5.4 lease 0 1 0
-
-            6. Guardar configurações
-                6.1copy running-config startup-config
-
-            7. Verificar pool
-                7.1 show ip dhcp pool
-                7.2 show ip dhcp binding
-    
-    Configuração ```Term1```
-        (remover configuração dhcp de uma dada interface)
-        1. sudo dhclient -r interface
-
-        2. dhclient interface -v 
-
-        3. ifconfig 
+![alt text](image-3.png)
 
 
-TODO: FIQUEI AQUI 
 
-    + ```NAT```
-    	+ Fazer NAT usando o endereço da interface externa (f1/0) do router e activar overloading (PAT)
+TODO: PEDIR AJUDA AO PROFESSOR NAS CONFIGURAÇÕES NAT 
+
++ ```NAT```
+    + Fazer NAT usando o endereço da interface externa (f1/0) do router e activar overloading (PAT)
 
         ```Configurações RCis```
 
-            1.
+            duvida: confirmar as congigurações NAT que fiz abaixo ( e suposto fazer o nat inside para a rede 172.16.0.0/24 neste passo?)
+
+            1. enable
+            2. conf t
+            3. int f1/0 
+                3.1 ip nat outside
+                duvida: como activar overloading (PAT)?
+            4. int f1/1 
+                (TODO- confirmar passo abaixo)
+                4.1 ip nat inside 
+            5. copy running-config startup-config
+
+        **Notas**:
+        
+        ```ip nat outside source```:
+
+            Traduz a origem dos pacotes IP que viajam de fora para dentro
+            
+            Traduz o destino dos pacotes IP que viajam de dentro para fora
+
 
         + Redireccionar (port forwarding) a porta 8022 da interface externa (f1/0) para a porta 22 (ssh) do terminal 1
+        
+        ```Port Forwarding em Cisco IOS```
+            
+            1. enable
+            2. conf t 
+            duvida: confirmar passo abaixo e se é so isto que é para fazer 
+            3. ip nat inside source static tcp 172.16.0.11 22 interface f1/1 8022
+            4. copy running-config startup-config
 
-+ ```Router Linux (a configurar posteriormente)```
+            (Verificar)
+            5. show ip nat translations
+![alt text](image-4.png)
 
-    + ```DHCP```
-        + Configuração idêntica à que tinha RCis
-        + Duração máxima das leases de 2 horas.
-        + Sempre que alterar o ficheiro /etc/dhcp/dhcpd.conf, teste esse ficheiro usando  dhcpd -t  antes de (re)iniciar o serviço.
-    + ```NAT```
-        + Configure as nftables para masquerading, isto é, source NAT usando o endereço (dinâmico) da interface externa. As regras criadas com o comando nftables são temporárias. Para as tornar persistentes, pode usar os seguintes comandos:
-****
-    nft list table nat > /etc/nftables/myNATtable.nft 
-    echo 'include "/etc/nftables/myNATtable.nft"' >> /etc/sysconfig/nftables.conf 
-    systemctl enable --now nftables 
-****
-    
-+ + Deve ter a correr o servidor de SSH.
+### Router Linux (a configurar posteriormente)
+
+duvida: quando é que é suposto configurar este Router??
+
++ ```DHCP```
+    + Configuração idêntica à que tinha RCis
+    + Duração máxima das leases de 2 horas.
+    + Sempre que alterar o ficheiro /etc/dhcp/dhcpd.conf, teste esse ficheiro usando  dhcpd -t  antes de (re)iniciar o serviço.
++ ```NAT```
+    + Configure as nftables para masquerading, isto é, source NAT usando o endereço (dinâmico) da interface externa. As regras criadas com o comando nftables são temporárias. Para as tornar persistentes, pode usar os seguintes comandos:
+
+            nft list table nat > /etc/nftables/myNATtable.nft 
+            echo 'include "/etc/nftables/myNATtable.nft"' >> /etc/sysconfig/nftables.conf 
+            systemctl enable --now nftables 
+            
+    + Deve ter a correr o servidor de SSH.
