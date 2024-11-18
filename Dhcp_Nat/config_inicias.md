@@ -119,42 +119,69 @@ TODO: PEDIR AJUDA AO PROFESSOR NAS CONFIGURAÇÕES NAT
 + ```NAT```
     + Fazer NAT usando o endereço da interface externa (f1/0) do router e activar overloading (PAT)
 
-        ```Configurações RCis```
+>Nota: utilizamos esta configuração que esta nos slides como base (não fizemos o que esta vermelho)
+![alt text](image-5.png)
 
-            duvida: confirmar as congigurações NAT que fiz abaixo ( e suposto fazer o nat inside para a rede 172.16.0.0/24 neste passo?)
+```Configurações RCis```
 
-            1. enable
-            2. conf t
-            3. int f1/0 
-                3.1 ip nat outside
-                duvida: como activar overloading (PAT)?
-            4. int f1/1 
-                (TODO- confirmar passo abaixo)
-                4.1 ip nat inside 
-            5. copy running-config startup-config
+    1. enable
+    2. conf t
+    3. int f1/0 
+        3.1 ip nat outside
+        3.2 exit
+    4. int f1/1 
+        4.1 ip address 172.16.0.1 255.255.255.0
+        4.2 ip nat inside 
+        4.3 exit
 
-        **Notas**:
-        
-        ```ip nat outside source```:
+    5. ip nat inside source list 10 interface f1/0 overload
 
-            Traduz a origem dos pacotes IP que viajam de fora para dentro
+    6. access-list 10 permit 172.16.0.0 0.0.0.255
             
-            Traduz o destino dos pacotes IP que viajam de dentro para fora
+    7. copy running-config startup-config
 
-
-        + Redireccionar (port forwarding) a porta 8022 da interface externa (f1/0) para a porta 22 (ssh) do terminal 1
+**Notas**:
         
-        ```Port Forwarding em Cisco IOS```
-            
-            1. enable
-            2. conf t 
-            duvida: confirmar passo abaixo e se é so isto que é para fazer 
-            3. ip nat inside source static tcp 172.16.0.11 22 interface f1/1 8022
-            4. copy running-config startup-config
+```ip nat outside source```:
 
-            (Verificar)
-            5. show ip nat translations
+    Traduz a origem dos pacotes IP que viajam de fora para dentro
+            
+    Traduz o destino dos pacotes IP que viajam de dentro para fora
+
+
++ Redireccionar (port forwarding) a porta 8022 da interface externa (f1/0) para a porta 22 (ssh) do terminal 1
+        
+    ```Port Forwarding em Cisco IOS```
+            
+        1. enable
+        2. conf t 
+        3. ip nat inside source static tcp 172.16.0.11 22 interface f1/1 8022
+        4. copy running-config startup-config
+
+        (Verificar)
+        5. show ip nat translations
 ![alt text](image-4.png)
+
+
+
+>```Testar tradução configurações NAT```
+
+1.  No ```RCis```
+
+    * debug ip nat detailed
+
+2. fazer terminal para um endereço ```FORA``` da rede local
+
+    * Term1 $ ping -c 1 192.168.123.1
+
+
+>Resultado (VERIFICAR AS TRADUÇÕES QUE OCORREM)
+![alt text](image-6.png)
+
+
+
+ 
+
 
 ### Router Linux (a configurar posteriormente)
 
@@ -164,6 +191,65 @@ duvida: quando é que é suposto configurar este Router??
     + Configuração idêntica à que tinha RCis
     + Duração máxima das leases de 2 horas.
     + Sempre que alterar o ficheiro /etc/dhcp/dhcpd.conf, teste esse ficheiro usando  dhcpd -t  antes de (re)iniciar o serviço.
+
+
+
+> ```Configuração de endereços``` e ```Encaminhamento de pacotes```
+
+    1. configuração da interface interna (ens4)
+        1.1 nmtui
+    	    a. Ipc4 config Manual
+            b. Clicar em Addresses e colocar 172.16.0.1
+            c. Remover o X em 'Never use this network for default route'
+            d. guardar e ativar interface ens4
+        1.2 Confirmar 
+            a. ifconfig
+
+    2. Verificar se tem linha net.ipv4.ip_forward = 1 no ficheiro /etc/sysctl.conf
+
+
+
+![alt text](image-22.png)
+
+> ```Configuração DHCP```
+
+    1. $ nano /etc/dhcp/dhcpd.conf
+
+        subnet  172.16.0.0 netmask 255.255.255.0 {
+            range 172.16.0.12 172.16.0.254;
+
+            option subnet-mask 255.255.255.0;
+            option routers 172.16.0.1;
+            option domain-name-servers 192.168.123.1;
+            option domain-name "alunos.dcc.fc.up.pt";
+            default-lease-time 1800;
+            max-lease-time 7200;
+        }
+
+        host Term1 {
+            hardware ethernet 00:12:f3:2d:58:00;
+            fixed-address 172.16.0.11;
+            option host-name "Term1";
+            default-lease-time 604800;
+            max-lease-time 604800;
+
+        }
+
+    2.  dhcpd -t 
+
+    3. systemctl start dhcpd
+
+    4. Verificação no terminal 1 
+            
+        (remover configuração dhcp de uma dada interface)
+        4.1 sudo dhclient -r interface
+
+        4.2 dhclient interface -v 
+
+        4.3 ifconfig 
+
+![alt text](image-24.png)
+
 + ```NAT```
     + Configure as nftables para masquerading, isto é, source NAT usando o endereço (dinâmico) da interface externa. As regras criadas com o comando nftables são temporárias. Para as tornar persistentes, pode usar os seguintes comandos:
 
@@ -172,3 +258,30 @@ duvida: quando é que é suposto configurar este Router??
             systemctl enable --now nftables 
             
     + Deve ter a correr o servidor de SSH.
+
+
+>```Configurações NAT```
+
++ Interface interna = **ens4**
+
++ Interface externa = **ens3**
+
+nft add table ip nat
+
++ Configurar ```cadeia de prerouting``` para ```port forwarding```
+
+        nft add chain ip nat prerouting { type nat hook prerouting priority -100\; }
+
++ Configurar cadeia de postrouting para mascaramento
+    
+        nft add chain ip nat postrouting { type nat hook postrouting priority 100\; }
+
++ Regras de NAT
+
+    1. NAT para conexões de saída (masquerade)
+        
+            nft add rule ip nat postrouting oif "ens3" ip saddr 172.16.0.0/24 masquerade
+
+    2. Port Forwarding: Redirecionar porta 8022 para 172.16.0.11:22
+        
+            nft add rule ip nat prerouting iif "ens3" tcp dport 8022 dnat to 172.16.0.11:22
