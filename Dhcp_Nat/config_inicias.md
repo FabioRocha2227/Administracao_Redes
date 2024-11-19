@@ -260,23 +260,25 @@ duvida: quando é que é suposto configurar este Router??
     + Deve ter a correr o servidor de SSH.
 
 
+![alt text](image-25.png)
+
 >```Configurações NAT```
 
 + Interface interna = **ens4**
 
 + Interface externa = **ens3**
 
-nft add table ip nat
++ nft add table ip nat
 
 + Configurar ```cadeia de prerouting``` para ```port forwarding```
 
         nft add chain ip nat prerouting { type nat hook prerouting priority -100\; }
 
-+ Configurar cadeia de postrouting para mascaramento
++ Configurar ```cadeia de postrouting``` para ```mascaramento```
     
         nft add chain ip nat postrouting { type nat hook postrouting priority 100\; }
 
-+ Regras de NAT
++ ``` Regras de NAT ```
 
     1. NAT para conexões de saída (masquerade)
         
@@ -285,3 +287,32 @@ nft add table ip nat
     2. Port Forwarding: Redirecionar porta 8022 para 172.16.0.11:22
         
             nft add rule ip nat prerouting iif "ens3" tcp dport 8022 dnat to 172.16.0.11:22
+
+
+
+
+        
+
+> ```Persistência das regras nftables```
+
+        nft list table nat > /etc/nftables/myNATtable.nft
+        echo 'include "/etc/nftables/myNATtable.nft"' >> /etc/sysconfig/nftables.conf
+        systemctl enable --now nftables 
+
+
+> ```Verificações``` em ```Rlin```
+
++ **nft list table nat**
+
+![alt text](image-26.png)
+
++ **nft -a list table nat**
+
+![alt text](image-27.png)
+
+
+> ```Testes das configurações```
+
+    Fazer um ping de Term1 para endereço na rede externa (neste caso fiz para o Term2 que tinha endereço 192.168.123.250)
+
+![alt text](image-28.png)

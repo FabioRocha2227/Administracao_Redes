@@ -197,4 +197,46 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
 + Em todas as alíneas desta pergunta deve correr o ftp em modo activo (use ftp -A ). Para melhor compreender o que se passa, atente aos endereços IP dos pacotes capturados e procure nesses pacotes os comandos PORT (ou EPRT) do FTP.
 
 
-```TODO: falta fazer esta alinea e aplicar a configuração do NAT (fazendo respetivos testes) !!!``
+
+### a. Do terminal 2, tente fazer um ftp para o terminal 1 e fazer download (get) de um ficheiro. Justifique o insucesso deste procedimento. (capRes + texRes)
+
+```FTP do Term1 para Term2```
+
+![alt text](image-29.png)
+
+```FTP do Term2 para Term1```
+
+![alt text](image-30.png)
+
+![alt text](image-31.png)
+
+
+TODO: confirmar
+R: O insucesso deve-se ao facto de termos a tradução a ser feita de ```interior``` para ```exterior``` (Term1 -> Term2). Mas no sentido oposto não temos essa tradução, ou seja, do exterior não temos nenhuma entrada na ```tabela NAT``` que faça a tradução de pacotes que vem do exterior para Term1
+
+
+### b. No router Linux, redireccione (port forwarding) a porta 21 da interface exterior (ens3) para a porta 21 (ftp) do terminal 1. (confRes)
+
+    nft add rule ip nat prerouting iif ens3 tcp dport 21 dnat to 172.16.0.11:21
+
+duvida: mesmo com esta regra (não consigo comunicar com ```Term2 -> Term1```).Precisso de fazer isto para fazer os restantes exercicios
+![alt text](image-32.png)
+
+### c. Tente novamente fazer o ftp e transferir um ficheiro. Comente os resultados, referindo o que acontece nas conexões de controlo e de dados. (capRes + texRes)
+
+```Todo: depende da configuração feita na alinea b)```
+
+### d. Tente agora fazer um ftp do terminal 1 para o terminal 2 e fazer download de um ficheiro. Comente os resultados. (capRes + texRes)
+
+```Todo: depende da configuração feita na alinea b)```
+
+### e. No router Linux, faça download do ficheiro ftp-ct.nft (pode usar o wget) e active o suporte para ftp correndo os comandos:
+
+```Todo: depende da configuração feita na alinea b)```
+
++ modprobe nf_nat_ftp
++ nft -f ftp-ct.nft
+
+NOTA: Pode ver aqui como usar conntrack helpers com nftables.
+
+Tente novamente o ftp da alínea anterior e comente os resultados tendo em conta o que acontece na conexão de controlo e na de dados. (capRes + texRes)
