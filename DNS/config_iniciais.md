@@ -53,6 +53,9 @@
     host www.dcc.fc.up.pt 172.16.0.2
     dig @172.16.0.2 www.dcc.fc.up.pt
     ```
+
+ >**Nota**: Colocar screenshots
+
 + host www.dcc.fc.up.pt 172.16.0.2
 dig @172.16.0.2 www.dcc.fc.up.pt
 
@@ -63,3 +66,72 @@ dig @172.16.0.2 www.dcc.fc.up.pt
 
 ## Configurações inicias
 
+### Em cada um dos servidores DNS (dns.admredes.pt e dns.dept.admredes.pt) execute os seguintes comandos:
+
+> **Notas** Antes de fazer estes passo, importar as configurações iniciais do router R1.
+
+```bash
+rndc-confgen -a -b 384 -k rndc-key
+```
+Este comando cria (ou modifica) o ficheiro /etc/rndc.key, com a definição de uma chave com o seguinte aspecto:
+
+```bash
+
+key "rndc-key" {
+        algorithm hmac-md5;
+        secret "TqeiABSAEUqqREJhDDkHrcMK9o7mnNihXEbMAW/dBSU=";
+};
+```
+Se o ficheiro /etc/rndc.conf existir, certifique-se de que não contém a definição dessa chave (se contiver, apague-a) mas inclui o /etc/rndc.key. Exemplo de configuração:
+```bash
+include "/etc/rndc.key";
+options {
+    default-server   localhost;
+    default-key      rndc-key;
+};
+```
+Faça o mesmo em relação ao ficheiro /etc/named.conf, certificando-se ainda de que a secção controls está configurada para usar a chave definida, e.g.:
+
+> **Notas** Remover as duas primeiras linhas do options
+![alt text](image.png)
+O servidor DNS ficava a escutar apenas no host
+Remover a linha:
+![alt text](image-1.png)
+Permite apenas pedidos vindos do localhost
+E por fim remover tambem a seguinte linha:
+![alt text](image-2.png)
+De seguida fazer restart da configuraçao com o seguinte comando:
+**systemctl reload named**
+
+
+```bash
+include "/etc/rndc.key";
+controls {
+    inet 127.0.0.1 port 953
+    allow { 127.0.0.1; } keys { rndc-key; };
+};
+```
+
+Por fim  alterar o grupo e as permissões do ficheiro com a chave usando
+    
+```bash
+    chgrp named /etc/rndc.key
+    chmod 640 /etc/rndc.key
+```
+
+Depois de fazer estes passos correr este comando para verificar se o ficheiro tem erros.
+    
+```bash
+    namded-checkconf
+```
+
+
+###  De seguida iniciar o serviço named
+
+```bash
+systemctl start named
+```
+
+
+
+## Continuar com o que esta para baixo da figura
