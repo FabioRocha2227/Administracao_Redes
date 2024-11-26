@@ -1,6 +1,6 @@
 # Trabalho 3 - DHCP e NAT 
 
-![alt text](image.png)
+![alt text](/img/image-34.png)
 
 
 **Nota:**
@@ -67,25 +67,36 @@
                 1. enable 
                 2. conf t 
                 3. ip dhcp excluded-address 172.16.0.1 172.16.0.11
-                
+
+> O professor a seguinte ```exlusão de endereços DHCP```
+
+![alt text](/img/image-35.png)
+
                 (dynamic é apenas o nome dado a esta pool)
                 4. ip dhcp pool dynamic 
                     4.1 network 172.16.0.0 255.255.255.0
                     4.2 default-router 172.16.0.1
                     4.3 dns-server 192.168.123.1
                     4.4 domain-name  alunos.dcc.fc.up.pt
+                    (bastava por lease 0 1, dias horas minutos)
                     4.5 lease 0 1 0
                     4.6 exit
                 
+                (manual é apenas o nome dado a esta pool)
+> **Nota IMPORTANTE**:
+
+> Como o ```Endereço Ip``` **172.16.0.11** calha ```dentro``` da ```pool dynamic```, os ```parâmtros da pool dynamic``` são ```herdados``` na ```pool manual``` , **exceto** a duração das ```leases```
+
                 5. ip dhcp pool manual
                     5.1 host 172.16.0.11 255.255.255.0
 
-                    (verificar o MAC_TERM_1 com ifconfig no Term1 e remover os 00: no inicio)
+>(verificar o ```MAC_TERM_1``` com ```ifconfig``` no ```Term1``` e ```remover os 00```: no inicio)
 
-                    (0100:(....) indica que é o client identifier MAC ADDRESS)
+>(```0100```:(....) indica que é o ```client identifier MAC ADDRESS```)
 
                     5.2 client-identifier 0100:MAC_TERM_1 
                     5.3 client-name Term1
+                    (bastava por lease 0 1, dias horas minutos)
                     5.4 lease 0 1 0
 
                 6. Guardar configurações
@@ -94,11 +105,11 @@
                 7. Verificar pool
                     7.1 show ip dhcp pool
 
-![alt text](image-1.png)
+![alt text](/img/image-1.png)
 
                     7.2 show ip dhcp binding
 
-![alt text](image-2.png)
+![alt text](/img/image-2.png)
 ****
 
 ```Configuração Term1```
@@ -106,11 +117,11 @@
     (remover configuração dhcp de uma dada interface)
     1. sudo dhclient -r interface
 
-    2. dhclient interface -v 
+    2. dhclient interface -v ou nmcli con up <interface>
 
     3. ifconfig 
 
-![alt text](image-3.png)
+![alt text](/img/image-3.png)
 
 
 
@@ -120,7 +131,7 @@ TODO: PEDIR AJUDA AO PROFESSOR NAS CONFIGURAÇÕES NAT
     + Fazer NAT usando o endereço da interface externa (f1/0) do router e activar overloading (PAT)
 
 >Nota: utilizamos esta configuração que esta nos slides como base (não fizemos o que esta vermelho)
-![alt text](image-5.png)
+![alt text](/img/image-5.png)
 
 ```Configurações RCis```
 
@@ -134,7 +145,20 @@ TODO: PEDIR AJUDA AO PROFESSOR NAS CONFIGURAÇÕES NAT
         4.2 ip nat inside 
         4.3 exit
 
+>**ip nat inside source list 10 interface f1/0 overload**
+
+> ```ip nat inside source list 10``` faz NAT a todas as maquina na ```lista de acesso 10``` 
+
+>```Endereço Ip``` utilizado para ```NAT``` vai ser aquele que é atribuido a ```interface f1/0``` (**ip nat outside** , ver conf na primeira /img/imagem deste ficheiro)
+
+>```overload``` abaixo indica que é ```NAT com tradução de portas``` (aplica-se a todas as maquina na lista de acesso 10)
+
     5. ip nat inside source list 10 interface f1/0 overload
+
+
+> **access-list 10 permit 172.16.0.0 0.0.0.255**
+
+>Indica ```todas as maquinas``` da rede ```172.16.0.0/24``` e guarda na ```lista de acesso 10```
 
     6. access-list 10 permit 172.16.0.0 0.0.0.255
             
@@ -160,7 +184,7 @@ TODO: PEDIR AJUDA AO PROFESSOR NAS CONFIGURAÇÕES NAT
 
         (Verificar)
         5. show ip nat translations
-![alt text](image-4.png)
+![alt text](/img/image-4.png)
 
 
 
@@ -176,7 +200,7 @@ TODO: PEDIR AJUDA AO PROFESSOR NAS CONFIGURAÇÕES NAT
 
 
 >Resultado (VERIFICAR AS TRADUÇÕES QUE OCORREM)
-![alt text](image-6.png)
+![alt text](/img/image-6.png)
 
 
 
@@ -201,7 +225,8 @@ duvida: quando é que é suposto configurar este Router??
     	    a. Ipc4 config Manual
             b. Clicar em Addresses e colocar 172.16.0.1
             c. Remover o X em 'Never use this network for default route'
-            d. guardar e ativar interface ens4
+            d. Ativar automaticaly connect
+            e. guardar e ativar interface ens4
         1.2 Confirmar 
             a. ifconfig
 
@@ -209,7 +234,7 @@ duvida: quando é que é suposto configurar este Router??
 
 
 
-![alt text](image-22.png)
+![alt text](/img/image-22.png)
 
 > ```Configuração DHCP```
 
@@ -239,16 +264,20 @@ duvida: quando é que é suposto configurar este Router??
 
     3. systemctl start dhcpd
 
-    4. Verificação no terminal 1 
+    4. Ativar IP forwarding (colocar a linha abaixo no ficheiro /etc/sysctl.conf)
+
+![alt text](/img/image-42.png)
+
+    5. Verificação no terminal 1 
             
         (remover configuração dhcp de uma dada interface)
-        4.1 sudo dhclient -r interface
+        5.1 sudo dhclient -r interface
 
-        4.2 dhclient interface -v 
+        5.2 dhclient interface -v 
 
-        4.3 ifconfig 
+        5.3 ifconfig 
 
-![alt text](image-24.png)
+![alt text](/img/image-24.png)
 
 + ```NAT```
     + Configure as nftables para masquerading, isto é, source NAT usando o endereço (dinâmico) da interface externa. As regras criadas com o comando nftables são temporárias. Para as tornar persistentes, pode usar os seguintes comandos:
@@ -260,7 +289,7 @@ duvida: quando é que é suposto configurar este Router??
     + Deve ter a correr o servidor de SSH.
 
 
-![alt text](image-25.png)
+![alt text](/img/image-25.png)
 
 >```Configurações NAT```
 
@@ -280,15 +309,14 @@ duvida: quando é que é suposto configurar este Router??
 
 + ``` Regras de NAT ```
 
-    1. NAT para conexões de saída (masquerade)
+    1. NAT para conexões de saída (masquerade)(```o que faz comando abaixo:``` um pacote que sai pela ```interface ens3``` e tenha ```endereço Ip origem``` que seja da gama ```172.16.0.0/24``` vai fazer o ```mascarade``` )
+        
         
             nft add rule ip nat postrouting oif "ens3" ip saddr 172.16.0.0/24 masquerade
 
-    2. Port Forwarding: Redirecionar porta 8022 para 172.16.0.11:22
-        
+    2. Port Forwarding: Redirecionar porta 8022 para 172.16.0.11:22 (```o que faz comando abaixo:``` se um pacote entrar pela ```interface ens3``` e for destinado a ```porta 8022``` então vai fazer ```Portforwarding``` para ```172.16.0.11:22```)
+
             nft add rule ip nat prerouting iif "ens3" tcp dport 8022 dnat to 172.16.0.11:22
-
-
 
 
         
@@ -304,15 +332,19 @@ duvida: quando é que é suposto configurar este Router??
 
 + **nft list table nat**
 
-![alt text](image-26.png)
+![alt text](/img/image-26.png)
 
 + **nft -a list table nat**
 
-![alt text](image-27.png)
+![alt text](/img/image-27.png)
 
+
++ **nft list ruleset** (retirei da config do professor, confirmar na nossa se e igual)
+
+![alt text](/img/image-43.png)
 
 > ```Testes das configurações```
 
     Fazer um ping de Term1 para endereço na rede externa (neste caso fiz para o Term2 que tinha endereço 192.168.123.250)
 
-![alt text](image-28.png)
+![alt text](/img/image-28.png)

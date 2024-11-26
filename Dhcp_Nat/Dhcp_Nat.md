@@ -27,51 +27,52 @@
 
     nmcli con up ens3
 
-![alt text](image-7.png)
+![alt text](/img/image-7.png)
 
 
-+ ```DHCP Discover``` (Usada pelo cliente para descobrir servidor(es) DHCP existente(s))
++ ```DHCP Discover``` (Usada pelo cliente para descobrir servidor(es) DHCP existente(s), ```neste momento não tem endereço ip atribuido``` a unica coisa que a identifica é o ```MAC address```)
 
-![alt text](image-8.png)
+![alt text](/img/image-8.png)
 
-+ ```DHCPOFFER``` (Usada para um servidor oferecer uma configuração a um cliente)
++ ```DHCPOFFER``` (Usada para um servidor ```oferecer``` uma ```configuração``` (```Endereço IP```) a um cliente)
 
-![alt text](image-9.png)
+![alt text](/img/image-9.png)
 
-+ ```DHCPREQUEST``` (Usada pelo cliente para pedir uma dada configuração)
++ ```DHCPREQUEST``` (Usada pelo cliente para ```pedir``` uma dada ```configuração``` (```Endereço IP```))
 
-![alt text](image-10.png)
+![alt text](/img/image-10.png)
 
-```DHCPACK``` (Usada pelo servidor para confirmar a atribuição da configuração)
-![alt text](image-11.png)
++ ```DHCPACK``` (Usada pelo servidor para ```confirmar``` a ```atribuição da configuração``` )
+
+![alt text](/img/image-11.png)
 
 ```Terminal 2```
 
     nmcli con up ens3
 
-![alt text](image-12.png)
+![alt text](/img/image-12.png)
 
 
-+ ```DHCP Discover``` (Usada pelo cliente para descobrir servidor(es) DHCP existente(s))
++ ```DHCP Discover```  (Usada pelo cliente para descobrir servidor(es) DHCP existente(s), ```neste momento não tem endereço ip atribuido``` a unica coisa que a identifica é o ```MAC address```)
 
-![alt text](image-13.png)
+![alt text](/img/image-13.png)
 
-+ ```DHCPOFFER``` (Usada para um servidor oferecer uma configuração a um cliente)
++ ```DHCPOFFER``` (Usada para um servidor ```oferecer``` uma ```configuração``` (```Endereço IP```) a um cliente)
 
-![alt text](image-14.png)
+![alt text](/img/image-14.png)
 
-+ ```DHCPREQUEST``` (Usada pelo cliente para pedir uma dada configuração)
++ ```DHCPREQUEST``` (Usada pelo cliente para ```pedir``` uma dada ```configuração``` (```Endereço IP```))
 
-![alt text](image-15.png)
+![alt text](/img/image-15.png)
 
-```DHCPACK``` (Usada pelo servidor para confirmar a atribuição da
- configuração)
-![alt text](image-16.png)
++ ```DHCPACK``` (Usada pelo servidor para ```confirmar``` a ```atribuição da configuração``` )
+
+![alt text](/img/image-16.png)
 
 ### b. Apenas a partir das mensagens capturadas e respectivo conteúdo é possível saber qual dos dois tem um endereço fixo
 
 
-R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse conceito de ser fixo ou não é interno a propria maquina, e indeferente para o dhcp
+R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse ```conceito de ser fixo ou não é interno a propria maquina```, e ```indeferente para o dhcp```
 
 
 
@@ -86,9 +87,50 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
 
     wget http://193.137.35.140/favicon.ico
 
+(nossa explicação)
 
-![alt text](image-18.png)
+![alt text](/img/image-18.png)
 
+(explicação do professor)
+
+> Pedido de ```estabelicimento de conexão``` de ```dentro``` para ```fora``` (Term1 para rede externa)
+
+![alt text](/img/image-36.png)
+
+
+> ```i``` indica que uma ```pacote``` entrou pela ```interface interior```
+
+> indica que (172.16.0.11,35910) **-->** (193.137.35.140,80). Adiciona na ```tabela NAT``` uma entrada a indicar que ```172.16.0.11``` (**Inside Local**) vai ser subsituido por ```193.137.35.140``` (**Inside Global**) e o router tenta utilizar , se possivel a mesma ```porta``` que **Inside Global** (neste caso 35910 esta livre e pode utilizar, e não é necessário fazer ```tradução de porta```.Caso contrário teria de ser feito essa tradução também)
+
+![alt text](/img/image-37.png)
+
+
+> Feita ```tradução``` ```172.16.0.11``` --> ```192.168.123.230``` (pacote vai para o exterior apartir da rede interna). ```Inside local``` --> ```Inside global```
+
+> ```Endereço destino``` mantém-se (não faz sentido mudar-lo)
+
+> Tradução guardada na ```Tabela NAT```
+
+![alt text](/img/image-38.png)
+
+
+> ```o``` indica que uma ```pacote``` entrou pela ```interface exterior```
+
+> (193.137.35.140,80) --> (192.168.123.230,35910)
+
+> Vem do ```servidor web``` para o endereço ```NAT``` ```Inside Global```
+
+![alt text](/img/image-39.png)
+
+
+
+>  Feita ```tradução``` ```192.168.123.230``` --> ```172.16.0.11``` (pacote vem do exterior para a rede interna). ```Inside global``` --> ```Inside local```
+
+> Consulta ```tabela NAT```
+
+![alt text](/img/image-40.png)
+
+> Restantes pacotes seguem o mesmo processo
 
 
 
@@ -107,14 +149,14 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
         
         nmcli con down ens3
 
-![alt text](image-19.png)
+![alt text](/img/image-19.png)
 
         nmcli con up ens3
 
 ****
     Veja que endereço lhe foi atribuído (deve ser da rede 192.168.123.0/24)
 
-![alt text](image-20.png)
+![alt text](/img/image-20.png)
 
     Do terminal 1, faça um ssh para o terminal 2 ( ssh ar@<ip_term2> ).
 
@@ -138,8 +180,8 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
 
     comente a afirmação Quando usamos NAT com tradução de portas, os fluxos de pacotes passam de connectionless para connection-oriented.
 
-
-        R:Esta afirmação é parcialmente verdadeira, mas precisa de esclarecimento:
+(nossa respota)
+R:Esta afirmação é parcialmente verdadeira, mas precisa de esclarecimento:
     
 + ```NAT``` por si só **não transforma** ```protocolos connectionless``` em ```connection-oriented```:
 
@@ -154,19 +196,30 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
     + Por isso, do **ponto de vista** do ```NAT```, mesmo **fluxos UDP** (```connectionless```) **aparentam ser** "```connection-oriented```", pois ele **requer informações de início e fim do fluxo.**
 
 
+(resposta do professor)
+
+R: Quando usamos ```NAT com tradução de portas``` temos **obrigatoriamente** ```entradas por fluxo``` no ```router NAT```. Ao ter **estas entradas** temos algo muito ```semelhante``` ao ```encaminhamento orientado a conexões``` (```fluxos``` passam de ```connectionless``` a ```connection-oriented```).
+
+
 ## 4. Ainda com o terminal 2 ligado no SW1, faça um ssh desse terminal para o terminal 1
 
 
 ### a. Indique o comando utilizado
 
-**duvida: o ssh abaixo não funciona?**
+> **Nota**: 
 
-**duvida: O facto de ssh de Term1 para Term2 funcionar, nas o contrário não deve-se a alguma coisa relacionada com nat??**
++   para fazer ```SSH``` de ```fora``` para ```dentro```, temos de utilizar como ```endereço de destino``` o ```endereço``` ```Inside Global```, ou seja, o endereço do NAT (no caso endereço da interface externa)
 
-    R: Term2 $ ssh ar@172.16.0.11
++ utilizamos ``` -p 8022``` porque definimos a tradução ```(192.168.123.230,8022) -> (172.16.0.11,22)``` (ver indicação abaixo)
+
+![alt text](/img/image-41.png)
+
+        R: Term2 $ ssh ar@192.168.123.230 -p 8022
 
 
 ### b. Identifique uma situação em que é necessário fazer port forwarding usando uma porta não-standard. 
+
+(nossa resposta)
 
 ```Cenário: Restrição no ISP (Provedor de Internet)```
 
@@ -181,16 +234,24 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
     + Agora, **usuários externos** podem acessar o ```servidor we```b usando a ```porta não-standard 8080```, por exemplo: **http://<seu_ip>:8080**.
 
 
+(resposta do professor)
+
+R: Quaisquer situações em que a ```porta standard``` esteja ocupado por ```outro port forwarding``` 
+
++ E.g: se tivermos ```dois servidores SSH``` na ```rede interna```, naturalmente a ```porta 22``` de ```router NAT``` so podia estar a fazer o ```forwarding``` para **um desses servidores**.O outro teria que usar outra porta não standard.
+
++ E.g: quando o ```Router NAT``` implementa esse serviço, ou seja, se ```Router NAT``` tiver um ```servidor SSH``` a **correr no prorprio**, não podiamos usar essa porta.Como tal temos de usar uma porta não standard
+
 
 ## 5. Substitua na rede o RCis pelo RLin: desligue RCis de SW1 e SW2 e ligue a interface ens3 de RLin ao SW1 e a interface ens4 ao SW2 e faça no RLin uma configuração idêntica à configuração inicial do RCis. O terminal 2 deve continuar ligado ao SW1.
 
-![alt text](image-21.png)
+![alt text](/img/image-21.png)
 
 >Configurações do ```RLin``` estão no ficheiro **config_inicias.md**
 
 
-> ```Nota:``` 
-+ Certifique-se de que o servidor de ftp está a correr nos terminais 1 e 2 e que não está a correr no RLin (use os comandos netstat -ant para ver se tem algum processo na porta 21 e systemctl start|stop|status proftpd para activar, desactivar ou verificar o estado do servidor FTP). 
+> ```Notas:``` 
++ Certifique-se de que o servidor de ftp está a correr nos terminais 1 e 2 e que não está a correr no RLin (use os comandos ```netstat -ant``` para ver se tem algum processo na porta 21 e ```systemctl start|stop|status proftpd``` para **activar**, **desactivar** ou **verificar** o estado do servidor FTP). 
 
 + Ponha o wireshark a capturar em todas as interfaces do RLin.
 
@@ -202,37 +263,77 @@ R: Não porque o DHCP apenas é um protocolo que atribui endereços, esse concei
 
 ```FTP do Term1 para Term2```
 
-![alt text](image-29.png)
+![alt text](/img/image-29.png)
 
-```FTP do Term2 para Term1```
-
-![alt text](image-30.png)
-
-![alt text](image-31.png)
+```FTP do Term2 para Term1 (TEMOS DE USAR IP PUBLICO DO ROUTER)```
+![alt text](/img/image-44.png)
 
 
-TODO: confirmar
-R: O insucesso deve-se ao facto de termos a tradução a ser feita de ```interior``` para ```exterior``` (Term1 -> Term2). Mas no sentido oposto não temos essa tradução, ou seja, do exterior não temos nenhuma entrada na ```tabela NAT``` que faça a tradução de pacotes que vem do exterior para Term1
+(resposta professor)
+
+R: Porque no ```RLIN``` não temos ```nenhuma regra``` para a ```porta 21``` (ou seja, ```não definimos port forwarding para term1```).Quando chega um pedido ao ```router NAT``` (RLIN) ele acha que o pedido ftp é para ele, mas como não tem serviço a correr na ```porta 21``` , devolve **Connection refused**.
 
 
 ### b. No router Linux, redireccione (port forwarding) a porta 21 da interface exterior (ens3) para a porta 21 (ftp) do terminal 1. (confRes)
 
+> Definimos uma ```regra de port forwarding``` no ```Router NAT``` (RLIN), que indica que todos os pacotes que vem do ```exterior``` para a ```porta 21``` e para o endereço ```Inside Global``` devem ser ```'reencaminhas'``` para  ```172.16.0.11 na porta 21```
+
     nft add rule ip nat prerouting iif ens3 tcp dport 21 dnat to 172.16.0.11:21
 
-duvida: mesmo com esta regra (não consigo comunicar com ```Term2 -> Term1```).Precisso de fazer isto para fazer os restantes exercicios
-![alt text](image-32.png)
+> Verificação no ```RLIN```
+
+![alt text](/img/image-46.png)
+
 
 ### c. Tente novamente fazer o ftp e transferir um ficheiro. Comente os resultados, referindo o que acontece nas conexões de controlo e de dados. (capRes + texRes)
 
-```Todo: depende da configuração feita na alinea b)```
+
+```FTP do Term2 para Term1 (TEMOS DE USAR IP PUBLICO DO ROUTER)```
+
+![alt text](/img/image-48.png)
+
+>Observação sobre captura **interface externa** de ```RLin```
+
++ ```Pedidos```
+
+    + **Origem** ```192.168.123.250``` (**Term2**)
+
+    + **Destino** ```192.168.123.40``` (**Endereço ip do router NAT**, ```Inside Global```)
+
++ ```Respostas```
+
+    + **Origem** ```192.168.123.40``` (**Endereço ip do router NAT**, ```Inside Global```)
+
+    + **Destino** ```192.168.123.250``` (**Term2**)
+
+
+
+>Observação sobre captura **interface interna** de ```RLin```
+
++ ```Pedidos```
+
+    + **Origem:** ```192.168.123.250``` (**Term2**)
+
+    + **Destino** ```172.16.0.11``` (**Term1**, ```Inside Local```)
+
++ ```Respostas```
+
+    + **Origem** ```172.16.0.11``` (**Term1**, ```Inside Local```)
+
+    + **Destino**  ```192.168.123.250``` (**Term2**)
 
 ### d. Tente agora fazer um ftp do terminal 1 para o terminal 2 e fazer download de um ficheiro. Comente os resultados. (capRes + texRes)
 
-```Todo: depende da configuração feita na alinea b)```
+```Term1 -> Term2```
+![alt text](/img/image-49.png)
+
+
 
 ### e. No router Linux, faça download do ficheiro ftp-ct.nft (pode usar o wget) e active o suporte para ftp correndo os comandos:
 
-```Todo: depende da configuração feita na alinea b)```
+> **Nota**: este ponto permite resolver o ponto anterior (para que o ```ftp``` possa funcionar de ```dentro``` para ```fora```).No **sentido contrário** ```não há problema```
+
+>Não fiz esta parte (porque acho que não achei essencial fazer na altura).Se quiser fazer ver video
 
 + modprobe nf_nat_ftp
 + nft -f ftp-ct.nft
