@@ -4,6 +4,8 @@
 
 # Apontamentos  de configuração de servidores DNS - Parte 1: Master
 
+> Nas configurações de zonas acho que falta um ponto no email do administrador
+
 
 ![alt text](img/image.png)
 

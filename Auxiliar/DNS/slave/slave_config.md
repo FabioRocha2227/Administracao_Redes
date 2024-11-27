@@ -4,6 +4,8 @@
 
 # Apontamentos  de configuração de servidores DNS - Parte 2: slave
 
+> Nas configurações de zonas acho que falta um ponto no email do administrador
+
 ![alt text](img/image.png)
 
 ![alt text](img/image-1.png)
