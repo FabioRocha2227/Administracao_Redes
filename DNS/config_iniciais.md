@@ -3,8 +3,8 @@
 ![alt text](img/image1.png)
 
 
-**Nota:**
-+ O comando rndc usa-se para controlar (local ou remotamente) o servidor de nomes (named), e.g., para carregar uma configuração actualizada (rndc reload) ou para limpar a cache (rndc flush). 
+**Nota prévias:**
++ O comando ```rndc``` usa-se para **controlar** (**local** ou **remotamente**) o ```servidor de nomes``` (**named**), e.g., para carregar uma **configuração actualizada** (```rndc reload```) ou para **limpar a cache** (```rndc flush```). 
 
 + Por uma questão de segurança, é aconselhável mudar a chave default para comunicação entre o rndc e o named. Pode gerar uma nova chave usando o seguinte comando:
 
@@ -40,31 +40,39 @@
     ```
 
     Altere o grupo e as permissões do ficheiro com a chave usando
+
+    ```bash
     chgrp named rndc.key
     chmod 640 rndc.key
+    ```
 
-+ Para verificar se o named.conf e os ficheiros de zona estão correctos pode utilizar, respectivamente, named-checkconf e named-checkzone zone file, onde file é o pathname do ficheiro de zona. Faça sempre estes testes antes de pôr o serviço a correr.
 
-+ Sempre que alterar as configurações e fizer rndc reload para as activar, verifique nos logs que não ocorreram erros. 
++ Para **verificar** se o ```named.conf``` e os ```ficheiros de zona``` estão correctos pode **utilizar**, respectivamente, ```named-checkconf``` e ```named-checkzone zone file```, onde **file** é o **pathname** do ```ficheiro de zona```. **Faça sempre estes testes antes de pôr o serviço a correr**.
 
-+ Para resolver nomes, usam-se os comandos host ou dig. Normalmente, o servidor a consultar é o indicado no ficheiro /etc/resolv.conf, que é actualizado ao obter endereços por DHCP. Se quisermos usar outro servidor (e.g., 172.16.0.2), podemos especificá-lo na linha de comando:
++ Sempre que **alterar as configurações** e fizer **rndc reload** para as activar, verifique nos logs que não ocorreram erros. 
+
++ Para **resolver nomes**, usam-se os comandos ```host``` ou ```dig```. Normalmente, o servidor a consultar é o indicado no ficheiro /etc/resolv.conf, que é actualizado ao obter endereços por DHCP. Se quisermos usar outro servidor (e.g., 172.16.0.2), podemos especificá-lo na linha de comando:
 
     ```bash
     host www.dcc.fc.up.pt 172.16.0.2
     dig @172.16.0.2 www.dcc.fc.up.pt
     ```
 
- >**Nota**: Colocar screenshots
 
 + host www.dcc.fc.up.pt 172.16.0.2
+
+![alt text](image-3.png)
+
 dig @172.16.0.2 www.dcc.fc.up.pt
 
-+ Por questões de segurança, o bind (processo named) não corre como root, mas sim como named. Para que possa ler os ficheiros de zona, certifique-se de que estes pertencem ao grupo named e são legíveis pelo grupo. 
+![alt text](image-4.png)
+
++ Por **questões de segurança**, o bind (**processo named**) não corre como root, mas sim como ```named```. Para que possa **ler os ficheiros de zona**, certifique-se de que estes pertencem ao ```grupo named``` e são ```legíveis pelo grupo```. 
 
 
  
 
-## Configurações inicias
+## Configurações prévias
 
 ### Em cada um dos servidores DNS (dns.admredes.pt e dns.dept.admredes.pt) execute os seguintes comandos:
 
@@ -122,7 +130,7 @@ Por fim  alterar o grupo e as permissões do ficheiro com a chave usando
 Depois de fazer estes passos correr este comando para verificar se o ficheiro tem erros.
     
 ```bash
-    namded-checkconf
+    named-checkconf
 ```
 
 
@@ -133,5 +141,4 @@ systemctl start named
 ```
 
 
-
-## Continuar com o que esta para baixo da figura
+## Continuar com o que esta para baixo da figura (Objetivos)
