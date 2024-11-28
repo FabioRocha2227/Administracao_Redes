@@ -1,4 +1,4 @@
-# Trabalho 3 - DHCP e NAT 
+# Trabalho 4 - DNS 
 
 ## 1- No dns.admredes.pt, descubra o servidor de email do domínio dept.admredes.pt usando host -t mx dept.admredes.pt. (outRes)
 
