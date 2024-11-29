@@ -345,7 +345,7 @@ systemctl start named
 
     + chmod 750 master reverse
 
-5. Configurar ```zona master``` (usar copia que fizemos do servidor DNS master)
+5. Configurar ```zona master``` (usar copia que fizemos do servidor DNS master).**Não esquecer de por permissões corretas** para ```named``` ter acesso a ```ficheiro de zona```
 
     + cd  /var/named/master
 
@@ -355,6 +355,10 @@ systemctl start named
     > **TODO: confirmar configuração**
     >![alt text](img/image-18.png) 
     
+    + chgrp named dept.admredes.pt.zone
+
+    + chmod 640 dept.admredes.pt.zone
+
 6. Verificar configuração
 
     + named-checkzone dept.admredes.pt dept.admredes.pt.zone
@@ -362,7 +366,7 @@ systemctl start named
     > ![alt text](img/image-19.png)
 
 
-7. configurar ```zona reverse```
+7. configurar ```zona reverse```. **Não esquecer de por permissões corretas** para ```named``` ter acesso a ```ficheiro de zona```
 
     + cd /var/named/reverse
 
@@ -375,6 +379,9 @@ systemctl start named
     > **TODO: confirmar configuração**
     >![alt text](img/image-20.png)
 
+    + chgrp named  10.0.0.zone
+
+    + chmod 640  10.0.0.zone
 
 8. Verificar configuração
 
@@ -394,6 +401,64 @@ systemctl start named
     + systemctl enable --now named
 
 
+###  Testes feitos em ```dns.dept.admredes.pt```
 
-**duvida: da-me erro 'rndc: no key definition for name rndc.key'** na maquina ```dns.dept.admredes.pt``` (tentar corrigir!!!!)
 
+
++  host dns 
+
+![alt text](img/image-22.png)
+
+
++ host router
+
+
+![alt text](img/image-24.png)
+
++ host term1
+    
+![alt text](img/image-23.png)
+
++ host mail
+
+![alt text](img/image-25.png)
+
++ host 10.0.0.1
+
+![alt text](img/image-26.png)
++ host 10.0.0.5
+
+![alt text](img/image-27.png)
+
+
+
+### Testes feitos em ```dns.admredes.pt```
+
+
++ host dns
+
+![alt text](img/image-28.png)
+
++ host router 
+
+![alt text](img/image-29.png)
+
++ host mail
+
+![alt text](img/image-25.png)
+
++ host 172.16.0.1
+
+![alt text](img/image-30.png)
+
++ host 172.16.0.2
+
+![alt text](img/image-31.png)
+
++ dig term1.dept.admredes.pt
+
+![alt text](img/image-32.png)
+
++ dig 5.0.0.10.in-addr.arpa PTR
+
+![alt text](img/image-33.png)
