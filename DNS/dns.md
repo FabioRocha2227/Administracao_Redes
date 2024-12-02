@@ -1,16 +1,106 @@
 # Trabalho 4 - DNS 
 
+>```NOTA IMPORTANTE```: ao visualizar capturas reparar que envolvam ver **perguntas** e **respostas** DNS podemos observar o ```0x....``` que associa ```pergunta``` a ```resposta```
+
 ## 1- No dns.admredes.pt, descubra o servidor de email do domínio dept.admredes.pt usando host -t mx dept.admredes.pt. (outRes)
+
+![alt text](image-4.png)
 
 ## 2- No dns.dept.admredes.pt, limpe a cache de DNS (rndc flush) e inicie uma captura wireshark. Em term1, tente descobrir o servidor de email do domínio admredes.pt. Explique o que se passou. (capRes + texRes) 
 
-## 3- No dns.dept.admredes.pt, limpe cache de DNS e inicie uma captura wireshark. Em term1 use o comando dig para resolver o nome www.jn.pt. 
+```Term1```
+
++ host -t mx admredes.pt
+
+![alt text](image-2.png)
+
+R: O ```Term1``` tenta resolver endereço de ```dns.admredes.pt``` (como é um servidor caching vai resolver pedido iterativamente).Logo segue os passos: falar com servidor raiz para descobrir servidores com **autoridade** sobre **dominio** ```.pt```, depois o contacta um desser servidores com ```autoridade sobre .pt``` para saber se conhecem algum servidor com **autoridade** sobre **dominio** ```admredes.pt``` (como não conhecem nenhum servidor que tenha autoridade sobre esse dominio, aparece erro ```Host admredes.pt not found: 3(NXDOMAIN)```).Importante  reparar que admredes.pt é um dominio privado (e não esta registado em nenhum servido com autoridade sobre o dominio ```.pt```)
+
+>**NOTA**: no caso em que fizemos **host -t mx dept.admredes.pt.** apartir de ```dns.dept.admredes.pt``` e funciona porque ```dns.dept.admredes.pt.``` esta debaixo de ```dns.admredes.pt```
+
+![alt text](image-3.png)
+
+## 3- No dns.dept.admredes.pt, limpe cache de DNS (rndc flush) e inicie uma captura wireshark. Em term1 use o comando dig para resolver o nome www.jn.pt. 
+
+
++ ```term 1```
+
+    + dig www.jn.pt.
+
+![alt text](image-5.png)
+
 
 ### a.Recorrendo à captura feita, diga qual foi o caminho seguido pelo(s) pedido(s) do registo A e respectiva(s) resposta(s). Na imagem da captura deverá mostrar apenas os pacotes relevantes. (capRes + texRes)
 
+
+> **Nota**: usei filtro ```dns```
+
+![alt text](image-6.png)
+
+
+R: Os passos seguidos são os seguintes:
+
++ ```pedido recursivo``` de **term1** para servidor nomes cachinh **dns.dept.admredes.pt**
+
+> ![alt text](image-7.png)
+
+
++ ```dns.dept.admredes.pt``` pede a lista de servidores **raiz** (atualizar a sua lista local de servidores raiz, tem esta lista porque é caching name server)
+
+    + **pedido**
+    
+    >![alt text](image-8.png)
+
+    + **resposta**
+
+    >![alt text](image-10.png)
+
+
++ ```dns.dept.admredes.pt``` pergunta ao ```servidor raiz``` por os **servidores** com autoridade sobre o **dominio** ```.pt```
+
+    + **pedido**
+
+    >![alt text](image-9.png)
+
+    + **resposta**
+
+    >![alt text](image-11.png)
+
++ ```dns.dept.admredes.pt``` pergunta ao ```servidor com dominio sobre .pt``` por **servidores** com autoridade sobre o **dominio** ```jn.pt``` 
+
+    + **pedido**
+
+    > ![alt text](image-12.png)
+
+    + **resposta**
+
+    > ![alt text](image-13.png)
+
++ (**ignorando a parte do cloudflare**) ```dns.dept.admredes.pt``` pergunta ao ```servidor com dominio sobre jn.pt``` por o **endereço** (**registo A**) do servidor com ```www.jn.pt```
+
+    + **pedido**
+
+    > ![alt text](image-14.png)
+
+    + **resposta**
+
+    >![alt text](image-15.png)
+
++ ```dns.dept.admredes.pt``` devolva a resposta da **resolução iterativa** para ```term1``` com o respetivo endereço de ```www.jn.pt```
+
+![alt text](image-16.png)
+
 ### b. Indique se a resposta dada ao terminal é autoritária, identificando os campos da mensagem que o levam a essa conclusão. (capRes + texRes) 
 
+
+R: Não porque a reposta dada pelo ```caching name server``` não tem autoridade sobre esse dominio (de forma geral todas as respostas dadas por o ```caching name server``, mostram que esse servidor não tem autoridade)
+
+>Nota: Em **todas as respostas** dadas no processo de resolução iterativa, os respetivos servidores que responderem tem implicitamente autoridade sobre o dominio que é perguntado 
+
+
 ### c. Diga se a resposta obtida pelo dns.dept.admredes.pt é autoritária e justifique. (texRes)
+
+> Para justifcar abrir o respetivo pacote e ver as flags, e procurar pela seção autoritive
 
 ### d. Note que existe mais do que um endereço para este nome e que a ordem dos endereços é round-robin. Que vantagens se podem obter destes factos? (texRes)
 

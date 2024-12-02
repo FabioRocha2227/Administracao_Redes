@@ -354,7 +354,6 @@ systemctl start named
 
     > **TODO: confirmar configuração**
     >![alt text](img/image-18.png) 
-    
     + chgrp named dept.admredes.pt.zone
 
     + chmod 640 dept.admredes.pt.zone
