@@ -1,3 +1,11 @@
+# Notas importantes
+
++ Cada ```zona``` deve conter **pelo menos**:
+    
+    + ```Registo SOA```
+
+    + ```Registo NS``` a indicar o(s) servidor(es) **autoritarios por essa zona**
+
 # Trabalho 4 - DNS
 
 ![alt text](img/inicio.png)
@@ -101,13 +109,21 @@ options {
 Faça o mesmo em relação ao ficheiro /etc/named.conf, certificando-se ainda de que a secção controls está configurada para usar a chave definida, e.g.:
 
 > **Notas** Remover as duas primeiras linhas do options
+
 ![alt text](img/image.png)
+
 O servidor DNS ficava a escutar apenas no host
+
 Remover a linha:
+
 ![alt text](img/image-1.png)
+
 Permite apenas pedidos vindos do localhost
+
 E por fim remover tambem a seguinte linha:
+
 ![alt text](img/image-2.png)
+
 De seguida fazer restart da configuraçao com o seguinte comando:
 **systemctl reload named**
 
@@ -172,7 +188,7 @@ systemctl start named
 
     >![alt text](img/image-5.png)
 
-    + ```Zonas resolução inversa```
+    + ```Zonas resolução inversa``` (**NÃO DEVIA TER RESOLUÇÃO INVERSA PARA 10.0.0.0/24** , essa resolução deve ser feita por **dns.dept.admredes.pt**)
 
     >![alt text](img/image-6.png)
 
@@ -209,7 +225,7 @@ systemctl start named
 
     + vim admredes.pt.zone
 
->**TODO: confirmar configuração**
+
 ![alt text](img/image-7.png)
 
 5. Verificar configurações  da ```Zona de resolução direta```
@@ -243,12 +259,13 @@ systemctl start named
     + vim 172.16.0.zone
 
 
-> **TODO: confirmar configuração**
+
 ![alt text](img/image-9.png)
 
 + vim 10.0.0.zone
 
-> **TODO: confirmar configuração**
+> (esta configuração so é precisso fazer no **dns.dept.admredes.pt**)
+
 ![alt text](img/image-10.png)
 
 7. Verificar configurações  da ```Zona de resolução inversa```
@@ -270,11 +287,6 @@ systemctl start named
 9. Arrancar serviço ```named```
 
     + systemctl enable --now named
-
-
-
-
-
 
 
 ### Configuração Servidor DNS com subdominio delegado (dns.dept.admredes.pt)
@@ -317,7 +329,7 @@ systemctl start named
 
     + vim named.conf
 
-    > **Modificar rede local que permite recursão**
+    > **Modificar para que permite recursão apartir da rede local**
     
     >![alt text](img/image-15.png)
 
@@ -352,7 +364,8 @@ systemctl start named
     + vim dept.admredes.pt.zone
 
 
-    > **TODO: confirmar configuração**
+    > **TODO: confirmar configuração**: no registo MX devia ser (```dept.admredes.pt. MX 10 mail.admredes.pt.```) e não devia ter **registo A** para o mail, porque o ```nome esta fora desta zona```
+
     >![alt text](img/image-18.png) 
     + chgrp named dept.admredes.pt.zone
 
@@ -375,7 +388,8 @@ systemctl start named
 
     + vim 10.0.0.zone
 
-    > **TODO: confirmar configuração**
+    > **TODO: confirmar configuração** (falta registo **2 PTR dns.dept.admredes.pt**)
+
     >![alt text](img/image-20.png)
 
     + chgrp named  10.0.0.zone
