@@ -85,7 +85,7 @@
 5. SW2 é o único comutador em que devem ser configurados endereços IP nas diferentes VLAN.
 
 
-```SW2```
+```SW2``` (este precissa de atribuir ip quando define a vlan, porque este switch esta a agir como router)
 
 + **VLAN 1**
 
