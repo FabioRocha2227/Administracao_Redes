@@ -7,7 +7,7 @@
 
 1. Todas as sub-redes são /24, e os endereços IP configurados em SW2 são a default gateway para as respectivas sub-redes.
 
-2. Todos os terminais excepto o linux são VPCS. Só precisa de configurar o terminal linux, que os restantes já têm todas as configurações necessárias (endereço IP e default gateway) nas configurações fornecidas.
+2. Todos os terminais excepto o linux são VPCS. Só precisa de configurar o terminal linux, que os restantes já têm todas as configurações necessárias (**endereço IP** e **default gateway**) nas configurações fornecidas.
 
 
         Fazer configurações com nmtui
@@ -23,7 +23,37 @@
         sysctl -p
     ```
 
-4. As portas de SW1 e SW2 às quais estão ligados terminais devem ser configuradas em modo de acesso, na VLAN 10 (groucho e harpo), na VLAN 20 (averell e joe) e na VLAN 1 (linux).
+4. Criar e atribuir nomes as **VLAN's** **10** e **20** no ```SW1``` e ```SW2``` (não configuramos ainda aqui)
+
+
++ **VLAN 1** (não é precisso, já vem configurado por default)
+
+
++ ```SW1```
+
+```bash
+    conf t 
+    vtp mode transparent # Configurar VLAN's localmente 
+    vlan 10 
+        name Marx
+    vlan 20 
+        name Dalton 
+```
+
+
++ ```SW2```
+
+```bash
+    conf t 
+    vtp mode transparent  # Configurar VLAN's localmente 
+    vlan 10 
+        name Marx
+    vlan 20 
+        name Dalton 
+```
+
+
+4. As portas de SW1 e SW2 às quais estão ligados terminais devem ser configuradas em ```modo de acesso```, na VLAN 10 (groucho e harpo), na VLAN 20 (averell e joe) e na VLAN 1 (linux).
 
 + ```SW1```
 
@@ -50,7 +80,7 @@
 
     > ![alt text](img/image-2.png)
 
-+ ```SW2```
++ ```SW2``` 
 
     + ```harpo```
 
@@ -85,13 +115,13 @@
 5. SW2 é o único comutador em que devem ser configurados endereços IP nas diferentes VLAN.
 
 
-```SW2``` (este precissa de atribuir ip quando define a vlan, porque este switch esta a agir como router)
+```SW2``` (este precissa de atribuir ip quando define a vlan, porque este switch esta a agir como ```router```)
 
 + **VLAN 1**
 
     ```bash
         interface vlan 1
-        ip address 172.16.1.1 255.240.0.0
+        ip address 172.16.1.1 255.255.255.0
         no shutdown
     ```
 
@@ -99,7 +129,7 @@
 
     ```bash
         interface vlan 10
-        ip address 10.0.0.1 255.0.0.0
+        ip address 10.0.0.1 255.255.255.0
         no shutdown
     ```
 
@@ -107,7 +137,7 @@
 
     ```bash
         interface vlan 20
-        ip address 172.20.0.1 255.240.0.0
+        ip address 172.20.0.1 255.255.255.0
         no shutdown
     ```
 
